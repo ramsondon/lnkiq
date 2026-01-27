@@ -72,6 +72,53 @@ export const dictionaries = {
       disclaimer: "⚠️ Disclaimer: This is for entertainment purposes only. We're not real psychologists, but we're pretty good at making you question your life choices.",
       copyright: "© 2026 Psychologist. All roasts reserved.",
     },
+    privacy: {
+      title: "Privacy Policy",
+      lastUpdated: "Last updated: January 27, 2026",
+      intro: "At Psychologist, we take your privacy seriously (unlike your browsing history, which we judge mercilessly). This policy explains how we collect, use, and protect your data.",
+      backToHome: "Back to Home",
+      dataCollection: {
+        title: "What Data We Collect",
+        description: "When you use our browser extension, we collect the following information:",
+        items: [
+          "URLs of websites you visit (anonymized)",
+          "Time spent on each website",
+          "General browsing patterns and habits",
+          "Browser type and version",
+        ],
+      },
+      dataUsage: {
+        title: "How We Use Your Data",
+        description: "We use your browsing data exclusively to:",
+        items: [
+          "Generate your personalized (and brutally honest) personality analysis",
+          "Create aggregate, anonymized statistics to improve our roasting algorithms",
+          "Make you question your life choices (in a fun way)",
+        ],
+      },
+      dataStorage: {
+        title: "Data Storage & Retention",
+        description: "Your browsing data is processed locally on your device and only transmitted in anonymized, aggregated form to generate your personality analysis. We do not store your raw browsing history on our servers. Analysis results are kept for 30 days and then automatically deleted.",
+      },
+      thirdParties: {
+        title: "Third-Party Sharing",
+        description: "We do not sell, trade, or otherwise transfer your personal information to third parties. Your embarrassing 3 AM Wikipedia spirals are safe with us.",
+      },
+      rights: {
+        title: "Your Rights",
+        description: "You have the right to:",
+        items: [
+          "Access the data we have about you",
+          "Request deletion of your data",
+          "Opt out of data collection at any time",
+          "Export your data in a portable format",
+        ],
+      },
+      contact: {
+        title: "Contact Us",
+        description: "If you have questions about this privacy policy or want to exercise your rights, contact us at:",
+      },
+    },
   },
   de: {
     meta: {
@@ -146,6 +193,53 @@ export const dictionaries = {
       disclaimer: "⚠️ Haftungsausschluss: Dies dient nur der Unterhaltung. Wir sind keine echten Psychologen, aber wir sind ziemlich gut darin, dich an deinen Lebensentscheidungen zweifeln zu lassen.",
       copyright: "© 2026 Psychologist. Alle Roasts vorbehalten.",
     },
+    privacy: {
+      title: "Datenschutzerklärung",
+      lastUpdated: "Zuletzt aktualisiert: 27. Januar 2026",
+      intro: "Bei Psychologist nehmen wir deinen Datenschutz ernst (im Gegensatz zu deinem Browserverlauf, den wir gnadenlos beurteilen). Diese Richtlinie erklärt, wie wir deine Daten erheben, verwenden und schützen.",
+      backToHome: "Zurück zur Startseite",
+      dataCollection: {
+        title: "Welche Daten wir erheben",
+        description: "Wenn du unsere Browser-Erweiterung verwendest, erheben wir folgende Informationen:",
+        items: [
+          "URLs der besuchten Websites (anonymisiert)",
+          "Verweildauer auf jeder Website",
+          "Allgemeine Surfmuster und -gewohnheiten",
+          "Browsertyp und -version",
+        ],
+      },
+      dataUsage: {
+        title: "Wie wir deine Daten verwenden",
+        description: "Wir verwenden deine Browserdaten ausschließlich um:",
+        items: [
+          "Deine personalisierte (und brutal ehrliche) Persönlichkeitsanalyse zu erstellen",
+          "Aggregierte, anonymisierte Statistiken zur Verbesserung unserer Roast-Algorithmen zu erstellen",
+          "Dich dazu zu bringen, deine Lebensentscheidungen zu hinterfragen (auf lustige Weise)",
+        ],
+      },
+      dataStorage: {
+        title: "Datenspeicherung & Aufbewahrung",
+        description: "Deine Browserdaten werden lokal auf deinem Gerät verarbeitet und nur in anonymisierter, aggregierter Form übertragen, um deine Persönlichkeitsanalyse zu erstellen. Wir speichern deinen Browserverlauf nicht auf unseren Servern. Analyseergebnisse werden 30 Tage aufbewahrt und dann automatisch gelöscht.",
+      },
+      thirdParties: {
+        title: "Weitergabe an Dritte",
+        description: "Wir verkaufen, handeln oder übertragen deine persönlichen Daten nicht an Dritte. Deine peinlichen 3-Uhr-nachts-Wikipedia-Spiralen sind bei uns sicher.",
+      },
+      rights: {
+        title: "Deine Rechte",
+        description: "Du hast das Recht:",
+        items: [
+          "Auf die Daten zuzugreifen, die wir über dich haben",
+          "Die Löschung deiner Daten zu verlangen",
+          "Die Datenerhebung jederzeit abzulehnen",
+          "Deine Daten in einem portablen Format zu exportieren",
+        ],
+      },
+      contact: {
+        title: "Kontakt",
+        description: "Wenn du Fragen zu dieser Datenschutzerklärung hast oder deine Rechte ausüben möchtest, kontaktiere uns unter:",
+      },
+    },
   },
 } as const;
 
@@ -209,6 +303,39 @@ export interface Dictionary {
     readonly contact: string;
     readonly disclaimer: string;
     readonly copyright: string;
+  };
+  privacy: {
+    readonly title: string;
+    readonly lastUpdated: string;
+    readonly intro: string;
+    readonly backToHome: string;
+    readonly dataCollection: {
+      readonly title: string;
+      readonly description: string;
+      readonly items: ReadonlyArray<string>;
+    };
+    readonly dataUsage: {
+      readonly title: string;
+      readonly description: string;
+      readonly items: ReadonlyArray<string>;
+    };
+    readonly dataStorage: {
+      readonly title: string;
+      readonly description: string;
+    };
+    readonly thirdParties: {
+      readonly title: string;
+      readonly description: string;
+    };
+    readonly rights: {
+      readonly title: string;
+      readonly description: string;
+      readonly items: ReadonlyArray<string>;
+    };
+    readonly contact: {
+      readonly title: string;
+      readonly description: string;
+    };
   };
 }
 

@@ -1,5 +1,6 @@
 import { getDictionary, type Locale } from "@/i18n/dictionaries";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import Link from "next/link";
 
 export default async function Home({
   params,
@@ -178,8 +179,8 @@ export default async function Home({
             </div>
 
             <div className="flex items-center gap-6 text-sm text-zinc-500">
-              <a href="#" className="hover:text-foreground transition-colors">{dict.footer.privacy}</a>
-              <a href="#" className="hover:text-foreground transition-colors">{dict.footer.terms}</a>
+              <Link href={`/${locale}/privacy`} className="hover:text-foreground transition-colors">{dict.footer.privacy}</Link>
+              <Link href={`/${locale}/terms`} className="hover:text-foreground transition-colors">{dict.footer.terms}</Link>
               <a href="#" className="hover:text-foreground transition-colors">{dict.footer.contact}</a>
             </div>
           </div>
