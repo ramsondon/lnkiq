@@ -219,9 +219,6 @@ export default async function Home({
             {dict.cta.button}
           </button>
 
-          <p className="mt-6 text-sm text-zinc-500">
-            {dict.cta.subtext}
-          </p>
         </div>
       </section>
 

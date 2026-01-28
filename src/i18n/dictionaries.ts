@@ -103,7 +103,6 @@ export const dictionaries = {
       description: "Join thousands of users who have taken control of their bookmarks and browsing habits.",
       note: "",
       button: "Create Free Account",
-      subtext: "Free forever • No credit card required",
     },
     footer: {
       privacy: "Privacy",
@@ -378,7 +377,6 @@ export const dictionaries = {
       description: "Schließe dich Tausenden von Nutzern an, die die Kontrolle über ihre Lesezeichen und Browsing-Gewohnheiten übernommen haben.",
       note: "",
       button: "Kostenloses Konto erstellen",
-      subtext: "Für immer kostenlos • Keine Kreditkarte erforderlich",
     },
     footer: {
       privacy: "Datenschutz",
@@ -626,7 +624,6 @@ export interface Dictionary {
     readonly description: string;
     readonly note: string;
     readonly button: string;
-    readonly subtext: string;
   };
   footer: {
     readonly privacy: string;
