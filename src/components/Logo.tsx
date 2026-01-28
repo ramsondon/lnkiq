@@ -1,0 +1,44 @@
+interface LogoProps {
+  size?: number;
+  className?: string;
+}
+
+export function Logo({ size = 40, className = "" }: LogoProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 40 40"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+    >
+      {/* Bookmark shape */}
+      <path
+        d="M8 4C8 2.89543 8.89543 2 10 2H30C31.1046 2 32 2.89543 32 4V36C32 37.4183 30.3457 38.1827 29.2929 37.1299L20 27.8369L10.7071 37.1299C9.65434 38.1827 8 37.4183 8 36V4Z"
+        fill="currentColor"
+        fillOpacity="0.1"
+        stroke="currentColor"
+        strokeWidth="2"
+      />
+
+      {/* Neural network nodes */}
+      <circle cx="20" cy="10" r="2.5" fill="currentColor" />
+      <circle cx="14" cy="17" r="2" fill="currentColor" />
+      <circle cx="26" cy="17" r="2" fill="currentColor" />
+      <circle cx="16" cy="24" r="2" fill="currentColor" />
+      <circle cx="24" cy="24" r="2" fill="currentColor" />
+      <circle cx="20" cy="20" r="1.5" fill="currentColor" />
+
+      {/* Neural network connections */}
+      <line x1="20" y1="10" x2="14" y2="17" stroke="currentColor" strokeWidth="1" strokeOpacity="0.6" />
+      <line x1="20" y1="10" x2="26" y2="17" stroke="currentColor" strokeWidth="1" strokeOpacity="0.6" />
+      <line x1="14" y1="17" x2="20" y2="20" stroke="currentColor" strokeWidth="1" strokeOpacity="0.6" />
+      <line x1="26" y1="17" x2="20" y2="20" stroke="currentColor" strokeWidth="1" strokeOpacity="0.6" />
+      <line x1="20" y1="20" x2="16" y2="24" stroke="currentColor" strokeWidth="1" strokeOpacity="0.6" />
+      <line x1="20" y1="20" x2="24" y2="24" stroke="currentColor" strokeWidth="1" strokeOpacity="0.6" />
+      <line x1="14" y1="17" x2="16" y2="24" stroke="currentColor" strokeWidth="1" strokeOpacity="0.6" />
+      <line x1="26" y1="17" x2="24" y2="24" stroke="currentColor" strokeWidth="1" strokeOpacity="0.6" />
+    </svg>
+  );
+}

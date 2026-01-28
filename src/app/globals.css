@@ -3,8 +3,8 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
-  --accent: #8b5cf6;
-  --accent-secondary: #ec4899;
+  --accent: #0ea5e9;
+  --accent-secondary: #14b8a6;
   --card-bg: #f8fafc;
   --card-border: #e2e8f0;
 }
@@ -49,7 +49,7 @@ body {
 
 .gradient-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 40px -10px rgba(139, 92, 246, 0.5);
+  box-shadow: 0 10px 40px -10px rgba(14, 165, 233, 0.5);
 }
 
 /* Card styling */
@@ -58,22 +58,3 @@ body {
   border: 1px solid var(--card-border);
 }
 
-/* Floating animation */
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
-}
-
-.animate-float {
-  animation: float 3s ease-in-out infinite;
-}
-
-/* Pulse glow */
-@keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 20px rgba(139, 92, 246, 0.3); }
-  50% { box-shadow: 0 0 40px rgba(236, 72, 153, 0.4); }
-}
-
-.animate-pulse-glow {
-  animation: pulse-glow 2s ease-in-out infinite;
-}

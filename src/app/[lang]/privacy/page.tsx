@@ -1,5 +1,7 @@
 import { getDictionary, type Locale } from "@/i18n/dictionaries";
-import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { Navbar } from "@/components/Navbar";
+import { Logo } from "@/components/Logo";
+import { siteConfig } from "@/config/site";
 import Link from "next/link";
 
 export default async function PrivacyPage({
@@ -14,16 +16,8 @@ export default async function PrivacyPage({
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-sm border-b border-zinc-200 dark:border-zinc-800">
-        <div className="mx-auto max-w-4xl px-6 py-4 flex items-center justify-between">
-          <Link href={`/${locale}`} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <span className="text-2xl">🧠</span>
-            <span className="font-bold text-lg">Psychologist</span>
-          </Link>
-          <LanguageSwitcher currentLocale={locale} />
-        </div>
-      </header>
+      {/* Navbar */}
+      <Navbar locale={locale} nav={dict.nav} />
 
       {/* Content */}
       <main className="mx-auto max-w-4xl px-6 py-16">
@@ -100,8 +94,8 @@ export default async function PrivacyPage({
               {privacy.contact.description}
             </p>
             <p className="mt-4">
-              <a href="mailto:privacy@psychologist.app" className="text-purple-500 hover:text-purple-600 transition-colors">
-                privacy@psychologist.app
+              <a href={`mailto:${siteConfig.emails.privacy}`} className="text-sky-500 hover:text-sky-600 transition-colors">
+                {siteConfig.emails.privacy}
               </a>
             </p>
           </section>
@@ -111,7 +105,7 @@ export default async function PrivacyPage({
         <div className="mt-16 pt-8 border-t border-zinc-200 dark:border-zinc-800">
           <Link
             href={`/${locale}`}
-            className="text-purple-500 hover:text-purple-600 transition-colors font-medium"
+            className="text-sky-500 hover:text-sky-600 transition-colors font-medium"
           >
             ← {privacy.backToHome}
           </Link>
@@ -120,8 +114,14 @@ export default async function PrivacyPage({
 
       {/* Footer */}
       <footer className="px-6 py-8 border-t border-zinc-200 dark:border-zinc-800">
-        <div className="mx-auto max-w-4xl text-center text-sm text-zinc-400">
-          {dict.footer.copyright}
+        <div className="mx-auto max-w-4xl flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <Logo size={24} className="text-sky-500" />
+            <span className="font-bold">{siteConfig.name}</span>
+          </div>
+          <p className="text-sm text-zinc-400">
+            {dict.footer.copyright}
+          </p>
         </div>
       </footer>
     </div>

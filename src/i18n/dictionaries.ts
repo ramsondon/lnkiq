@@ -1,117 +1,158 @@
 export const dictionaries = {
   en: {
     meta: {
-      title: "Psychologist | Know Yourself... The Brutal Way",
-      description: "We analyze your browsing habits and generate hilariously brutal personality reviews. Prepare to be roasted by AI.",
+      title: "lnkiq.net | Your Browsing Intelligence Dashboard",
+      description: "Store your bookmarks, track your browsing activity, and gain insights into your online habits. Privacy-first with optional content analysis.",
+    },
+    nav: {
+      features: "Features",
+      contentAnalysis: "Content Analysis",
+      privacy: "Privacy",
+      terms: "Terms",
     },
     hero: {
-      headline: "Know Yourself...",
-      headlineAccent: "The Brutal Way",
-      description: "We analyze your browsing habits — what you visit, how long you lurk — and generate a",
-      descriptionBold: "hilariously savage",
-      descriptionEnd: "personality review. Think you can handle the truth?",
-      cta: "🔥 Analyze Me",
+      headline: "Your Bookmarks,",
+      headlineAccent: "Intelligently Organized",
+      description: "Store bookmarks via browser plugin or web app. Track where you spend your time online and",
+      descriptionBold: "understand your browsing patterns",
+      descriptionEnd: "with optional AI-powered content analysis.",
+      cta: "Get Started Free",
       howItWorks: "See how it works →",
       badges: {
-        anonymous: "100% Anonymous",
-        noStorage: "Data Never Stored",
-        honest: "Brutally Honest",
+        anonymous: "Privacy First",
+        noStorage: "You Control Your Data",
+        honest: "Open & Transparent",
       },
     },
     howItWorks: {
       title: "How It Works",
-      subtitle: "Three simple steps to discover the unflattering truth about yourself",
+      subtitle: "Three simple steps to organize your digital life",
       steps: [
         {
-          emoji: "📦",
+          icon: "plugin",
           step: "Step 1",
           title: "Install Extension",
-          description: "Add our sneaky browser extension. Don't worry, we're watching for science.",
+          description: "Add our browser extension to save bookmarks with one click and optionally track your activity.",
         },
         {
-          emoji: "🌐",
+          icon: "sync",
           step: "Step 2",
-          title: "Browse Normally",
-          description: "Go about your internet business. We'll silently judge every click.",
+          title: "Sync & Organize",
+          description: "Your bookmarks sync across devices. Organize with tags, folders, and smart collections.",
         },
         {
-          emoji: "🔥",
+          icon: "insights",
           step: "Step 3",
-          title: "Get Roasted",
-          description: "Receive your brutally honest personality review. Tissues not included.",
+          title: "Gain Insights",
+          description: "View your browsing dashboard. See where you spend time and discover patterns.",
         },
       ],
     },
-    sampleRoast: {
-      title: "Sample Roast",
-      subtitle: "Here's what a typical personality review looks like...",
+    features: {
+      title: "Powerful Features",
+      subtitle: "Everything you need to manage your bookmarks and understand your browsing habits",
+      items: [
+        {
+          icon: "bookmark",
+          title: "Smart Bookmarks",
+          description: "Save any page instantly with our browser extension. Auto-extract titles, descriptions, and thumbnails.",
+        },
+        {
+          icon: "sync",
+          title: "Cross-Device Sync",
+          description: "Access your bookmarks from any device. Your library stays in sync across browsers and platforms.",
+        },
+        {
+          icon: "timeline",
+          title: "Activity Timeline",
+          description: "See where you've been. Track time spent on sites and visualize your browsing patterns.",
+        },
+        {
+          icon: "tags",
+          title: "Smart Tags",
+          description: "Organize with tags and folders. Our AI can suggest tags based on content analysis.",
+        },
+      ],
+    },
+    dashboard: {
+      title: "Your Personal Dashboard",
+      subtitle: "See your browsing activity at a glance",
       card: {
-        title: "The Anxious Overachiever",
-        basedOn: "Based on 847 sites visited",
-        diagnosis: "Diagnosis:",
-        diagnosisText: "You spent 14 hours on productivity apps this week but only completed 2 tasks. The other 12 hours? Optimizing your to-do list layout. Classic.",
-        redFlags: "Red Flags:",
-        redFlagsText: "You've opened 47 \"How to be more productive\" articles. You read 3. The irony is not lost on us.",
-        funFact: "Fun Fact:",
-        funFactText: "You visit LinkedIn at 2 AM. Either you're networking with insomniacs or spiraling about your career choices. Probably both.",
-        severity: "Roast Severity",
-        severityLevel: "Spicy 🌶️🌶️🌶️",
+        title: "Weekly Overview",
+        basedOn: "Based on 127 pages visited",
+        stats: {
+          totalTime: "Total Time",
+          totalTimeValue: "14h 32m",
+          topCategory: "Top Category",
+          topCategoryValue: "Development",
+          bookmarksSaved: "Bookmarks Saved",
+          bookmarksSavedValue: "23",
+        },
+        topSites: "Most Visited",
+        topSitesList: ["github.com", "stackoverflow.com", "docs.nextjs.org"],
       },
     },
+    contentAnalysisTeaser: {
+      title: "Optional Content Analysis",
+      description: "Want deeper insights? Enable AI-powered content analysis to understand what you read, discover patterns, and get personalized recommendations.",
+      cta: "Learn More",
+      note: "You decide if and when to enable this feature. Your privacy is always respected.",
+    },
     cta: {
-      title: "Ready to Face the Truth?",
-      description: "Join thousands of brave souls who dared to discover their true internet personality.",
-      note: "(Most survived with only minor ego bruises)",
-      button: "🧠 Analyze My Personality",
-      subtext: "Free • No signup required • Instant results",
+      title: "Ready to Get Organized?",
+      description: "Join thousands of users who have taken control of their bookmarks and browsing habits.",
+      note: "",
+      button: "Create Free Account",
+      subtext: "Free forever • No credit card required",
     },
     footer: {
       privacy: "Privacy",
       terms: "Terms",
       contact: "Contact",
-      disclaimer: "⚠️ Disclaimer: This is for entertainment purposes only. We're not real psychologists, but we're pretty good at making you question your life choices.",
-      copyright: "© 2026 Psychologist. All roasts reserved.",
+      disclaimer: "",
+      copyright: "© 2026 lnkiq.net. All rights reserved.",
     },
     privacy: {
       title: "Privacy Policy",
-      lastUpdated: "Last updated: January 27, 2026",
-      intro: "At Psychologist, we take your privacy seriously (unlike your browsing history, which we judge mercilessly). This policy explains how we collect, use, and protect your data.",
+      lastUpdated: "Last updated: January 28, 2026",
+      intro: "At lnkiq.net, we take your privacy seriously. This policy explains how we collect, use, and protect your data. You are always in control of your information.",
       backToHome: "Back to Home",
       dataCollection: {
         title: "What Data We Collect",
-        description: "When you use our browser extension, we collect the following information:",
+        description: "When you use our browser extension and service, we collect the following information:",
         items: [
-          "URLs of websites you visit (anonymized)",
-          "Time spent on each website",
-          "General browsing patterns and habits",
-          "Browser type and version",
+          "Bookmarks you choose to save (URL, title, description)",
+          "Browsing activity data (if you opt-in to activity tracking)",
+          "Page content for analysis (only if you enable content analysis)",
+          "Account information (email, preferences)",
         ],
       },
       dataUsage: {
         title: "How We Use Your Data",
-        description: "We use your browsing data exclusively to:",
+        description: "We use your data to:",
         items: [
-          "Generate your personalized (and brutally honest) personality analysis",
-          "Create aggregate, anonymized statistics to improve our roasting algorithms",
-          "Make you question your life choices (in a fun way)",
+          "Store and sync your bookmarks across devices",
+          "Generate your activity dashboard and insights",
+          "Provide AI-powered content analysis (when enabled)",
+          "Improve our service and user experience",
         ],
       },
       dataStorage: {
-        title: "Data Storage & Retention",
-        description: "Your browsing data is processed locally on your device and only transmitted in anonymized, aggregated form to generate your personality analysis. We do not store your raw browsing history on our servers. Analysis results are kept for 30 days and then automatically deleted.",
+        title: "Data Storage & Security",
+        description: "Your data is stored securely using industry-standard encryption. Bookmarks and activity data are stored on our servers to enable sync across devices. Content analysis is processed securely, and you can delete your data at any time.",
       },
       thirdParties: {
         title: "Third-Party Sharing",
-        description: "We do not sell, trade, or otherwise transfer your personal information to third parties. Your embarrassing 3 AM Wikipedia spirals are safe with us.",
+        description: "We do not sell your personal data to third parties. We may use trusted service providers for hosting and analytics, all bound by strict data protection agreements.",
       },
       rights: {
         title: "Your Rights",
         description: "You have the right to:",
         items: [
-          "Access the data we have about you",
-          "Request deletion of your data",
-          "Opt out of data collection at any time",
-          "Export your data in a portable format",
+          "Access all data we have about you",
+          "Export your bookmarks and activity data",
+          "Delete your account and all associated data",
+          "Opt out of activity tracking or content analysis at any time",
         ],
       },
       contact: {
@@ -121,173 +162,272 @@ export const dictionaries = {
     },
     terms: {
       title: "Terms of Service",
-      lastUpdated: "Last updated: January 27, 2026",
-      intro: "Welcome to Psychologist! These terms govern your use of our personality-roasting service. By using our service, you agree to be judged (fairly) and roasted (mercilessly).",
+      lastUpdated: "Last updated: January 28, 2026",
+      intro: "Welcome to lnkiq.net! These terms govern your use of our bookmark management and browsing analytics service.",
       backToHome: "Back to Home",
       acceptance: {
         title: "Acceptance of Terms",
-        description: "By accessing or using Psychologist, you agree to be bound by these Terms of Service. If you disagree with any part of these terms, you may not access our service. But honestly, if you can't handle our terms, you probably can't handle our roasts either.",
+        description: "By accessing or using lnkiq.net, you agree to be bound by these Terms of Service. If you disagree with any part of these terms, you may not access our service.",
       },
       service: {
         title: "Description of Service",
-        description: "Psychologist provides:",
+        description: "lnkiq.net provides:",
         items: [
-          "A browser extension that analyzes your browsing patterns",
-          "AI-generated personality analyses based on your internet habits",
-          "Entertainment through brutally honest (but ultimately harmless) roasts",
-          "A mirror to your digital soul (results may be uncomfortable)",
+          "A browser extension for saving and managing bookmarks",
+          "Cloud sync for bookmarks across devices",
+          "Browsing activity tracking and analytics dashboard",
+          "Optional AI-powered content analysis for deeper insights",
         ],
       },
       userResponsibilities: {
         title: "User Responsibilities",
         description: "As a user, you agree to:",
         items: [
-          "Use the service for personal entertainment purposes only",
-          "Not attempt to reverse-engineer or manipulate the analysis algorithms",
-          "Accept that our roasts are meant in good fun and not as professional advice",
-          "Have a sense of humor about your internet habits",
-          "Not hold us responsible for any existential crises triggered by your results",
+          "Provide accurate account information",
+          "Keep your login credentials secure",
+          "Use the service in compliance with applicable laws",
+          "Not attempt to reverse-engineer or abuse the service",
+          "Respect intellectual property rights of content you bookmark",
         ],
       },
       disclaimer: {
-        title: "Entertainment Disclaimer",
-        description: "Psychologist is an entertainment service, NOT a medical or psychological tool. Our analyses are generated by AI for humorous purposes and should not be taken as professional psychological assessments. If you're seeking actual mental health support, please consult a licensed professional (a real one, not us).",
+        title: "Service Disclaimer",
+        description: "lnkiq.net is provided 'as is' without warranties of any kind. While we strive for reliability, we cannot guarantee uninterrupted service. Content analysis features are AI-powered and may not always be accurate.",
       },
       intellectualProperty: {
         title: "Intellectual Property",
-        description: "All content, features, and functionality of Psychologist — including but not limited to our roasting algorithms, witty comebacks, and the ability to make you question your life choices — are owned by us and protected by international copyright, trademark, and other intellectual property laws.",
+        description: "All content, features, and functionality of lnkiq.net — including our software, design, and branding — are owned by us and protected by international copyright, trademark, and other intellectual property laws.",
       },
       liability: {
         title: "Limitation of Liability",
-        description: "Psychologist shall not be liable for any bruised egos, existential crises, sudden urges to delete your browser history, or awkward conversations that may result from sharing your personality analysis. Use at your own emotional risk.",
+        description: "lnkiq.net shall not be liable for any indirect, incidental, special, or consequential damages arising from your use of the service. Our total liability is limited to the amount you paid for the service.",
       },
       termination: {
         title: "Termination",
-        description: "We reserve the right to terminate or suspend your access to the service at any time, without prior notice, for any reason. You can also terminate your use at any time by uninstalling our extension. We promise not to take it personally (but we might roast you one last time).",
+        description: "We reserve the right to terminate or suspend your access to the service at any time for violations of these terms. You can also terminate your account at any time through your settings.",
       },
       changes: {
         title: "Changes to Terms",
-        description: "We may modify these terms at any time. Continued use of the service after changes constitutes acceptance of the new terms. We'll try to notify you of significant changes, but we recommend checking back occasionally — unlike your bookmarks folder, which we know you never clean up.",
+        description: "We may modify these terms at any time. We will notify you of significant changes via email or in-app notification. Continued use of the service after changes constitutes acceptance of the new terms.",
       },
       contact: {
         title: "Contact Us",
         description: "For questions about these terms, please contact us at:",
       },
     },
+    contentAnalysis: {
+      title: "Content Analysis",
+      subtitle: "Understand what you read with AI-powered insights",
+      intro: "Content Analysis is an optional feature that uses AI to analyze the pages you visit, helping you understand your reading patterns and discover insights.",
+      backToHome: "Back to Home",
+      howItWorks: {
+        title: "How It Works",
+        description: "When enabled, our AI processes the content of pages you visit to:",
+        items: [
+          "Categorize content by topic (technology, news, entertainment, etc.)",
+          "Extract key themes and concepts from your reading",
+          "Identify patterns in what you consume online",
+          "Generate personalized reading insights and suggestions",
+        ],
+      },
+      benefits: {
+        title: "Benefits",
+        items: [
+          {
+            title: "Understand Your Habits",
+            description: "See what topics you spend the most time reading about.",
+          },
+          {
+            title: "Discover Patterns",
+            description: "Identify trends in your reading over time.",
+          },
+          {
+            title: "Smart Recommendations",
+            description: "Get suggestions based on your interests.",
+          },
+          {
+            title: "Better Organization",
+            description: "Auto-tag bookmarks based on content.",
+          },
+        ],
+      },
+      privacy: {
+        title: "Your Privacy Matters",
+        description: "Content Analysis is completely optional. You decide:",
+        items: [
+          "Enable or disable at any time from your settings",
+          "Choose which sites to include or exclude",
+          "Delete all analyzed data whenever you want",
+          "Analysis happens securely — we never share your content",
+        ],
+      },
+      toggle: {
+        title: "You're in Control",
+        description: "Toggle content analysis on or off anytime. When disabled, we only store the basic bookmark information you explicitly save.",
+        enabled: "Content Analysis Enabled",
+        disabled: "Content Analysis Disabled",
+      },
+      cta: {
+        title: "Ready to Try It?",
+        button: "Get Started",
+        note: "Enable content analysis in your dashboard settings after signing up.",
+      },
+    },
   },
   de: {
     meta: {
-      title: "Psychologist | Erkenne dich selbst... Auf die brutale Art",
-      description: "Wir analysieren dein Surfverhalten und erstellen urkomisch brutale Persönlichkeitsanalysen. Mach dich bereit, von KI gegrillt zu werden.",
+      title: "lnkiq.net | Dein Browsing-Intelligence Dashboard",
+      description: "Speichere deine Lesezeichen, verfolge deine Browsing-Aktivität und erhalte Einblicke in deine Online-Gewohnheiten. Datenschutz zuerst mit optionaler Inhaltsanalyse.",
+    },
+    nav: {
+      features: "Funktionen",
+      contentAnalysis: "Inhaltsanalyse",
+      privacy: "Datenschutz",
+      terms: "AGB",
     },
     hero: {
-      headline: "Erkenne dich selbst...",
-      headlineAccent: "Auf die brutale Art",
-      description: "Wir analysieren dein Surfverhalten — was du besuchst, wie lange du stöberst — und erstellen eine",
-      descriptionBold: "urkomisch vernichtende",
-      descriptionEnd: "Persönlichkeitsanalyse. Kannst du die Wahrheit ertragen?",
-      cta: "🔥 Analysiere mich",
+      headline: "Deine Lesezeichen,",
+      headlineAccent: "Intelligent Organisiert",
+      description: "Speichere Lesezeichen per Browser-Plugin oder Web-App. Verfolge, wo du deine Zeit online verbringst und",
+      descriptionBold: "verstehe deine Browsing-Muster",
+      descriptionEnd: "mit optionaler KI-gestützter Inhaltsanalyse.",
+      cta: "Kostenlos starten",
       howItWorks: "So funktioniert's →",
       badges: {
-        anonymous: "100% Anonym",
-        noStorage: "Keine Datenspeicherung",
-        honest: "Brutal ehrlich",
+        anonymous: "Datenschutz zuerst",
+        noStorage: "Du kontrollierst deine Daten",
+        honest: "Offen & Transparent",
       },
     },
     howItWorks: {
       title: "So funktioniert's",
-      subtitle: "Drei einfache Schritte, um die unangenehme Wahrheit über dich zu entdecken",
+      subtitle: "Drei einfache Schritte, um dein digitales Leben zu organisieren",
       steps: [
         {
-          emoji: "📦",
+          icon: "plugin",
           step: "Schritt 1",
           title: "Extension installieren",
-          description: "Füge unsere heimliche Browser-Extension hinzu. Keine Sorge, wir beobachten nur für die Wissenschaft.",
+          description: "Füge unsere Browser-Extension hinzu, um Lesezeichen mit einem Klick zu speichern und optional deine Aktivität zu verfolgen.",
         },
         {
-          emoji: "🌐",
+          icon: "sync",
           step: "Schritt 2",
-          title: "Normal surfen",
-          description: "Mach einfach weiter wie immer. Wir werden jeden Klick still und leise beurteilen.",
+          title: "Synchronisieren & Organisieren",
+          description: "Deine Lesezeichen synchronisieren sich über alle Geräte. Organisiere mit Tags, Ordnern und smarten Sammlungen.",
         },
         {
-          emoji: "🔥",
+          icon: "insights",
           step: "Schritt 3",
-          title: "Lass dich rösten",
-          description: "Erhalte deine brutal ehrliche Persönlichkeitsanalyse. Taschentücher nicht inbegriffen.",
+          title: "Einblicke gewinnen",
+          description: "Sieh dir dein Browsing-Dashboard an. Erkenne, wo du Zeit verbringst und entdecke Muster.",
         },
       ],
     },
-    sampleRoast: {
-      title: "Beispiel-Roast",
-      subtitle: "So sieht eine typische Persönlichkeitsanalyse aus...",
+    features: {
+      title: "Leistungsstarke Funktionen",
+      subtitle: "Alles was du brauchst, um deine Lesezeichen zu verwalten und deine Browsing-Gewohnheiten zu verstehen",
+      items: [
+        {
+          icon: "bookmark",
+          title: "Smarte Lesezeichen",
+          description: "Speichere jede Seite sofort mit unserer Browser-Extension. Automatische Extraktion von Titeln, Beschreibungen und Vorschaubildern.",
+        },
+        {
+          icon: "sync",
+          title: "Geräteübergreifende Synchronisation",
+          description: "Greife von jedem Gerät auf deine Lesezeichen zu. Deine Bibliothek bleibt über Browser und Plattformen synchron.",
+        },
+        {
+          icon: "timeline",
+          title: "Aktivitäts-Timeline",
+          description: "Sieh, wo du warst. Verfolge die Zeit auf Websites und visualisiere deine Browsing-Muster.",
+        },
+        {
+          icon: "tags",
+          title: "Smarte Tags",
+          description: "Organisiere mit Tags und Ordnern. Unsere KI kann Tags basierend auf Inhaltsanalyse vorschlagen.",
+        },
+      ],
+    },
+    dashboard: {
+      title: "Dein persönliches Dashboard",
+      subtitle: "Sieh deine Browsing-Aktivität auf einen Blick",
       card: {
-        title: "Der ängstliche Überachiever",
-        basedOn: "Basierend auf 847 besuchten Seiten",
-        diagnosis: "Diagnose:",
-        diagnosisText: "Du hast diese Woche 14 Stunden in Produktivitäts-Apps verbracht, aber nur 2 Aufgaben erledigt. Die anderen 12 Stunden? Optimierung des To-Do-Listen-Layouts. Klassiker.",
-        redFlags: "Warnsignale:",
-        redFlagsText: "Du hast 47 Artikel über \"Wie werde ich produktiver\" geöffnet. 3 davon gelesen. Die Ironie ist uns nicht entgangen.",
-        funFact: "Fun Fact:",
-        funFactText: "Du besuchst LinkedIn um 2 Uhr nachts. Entweder netzwerkst du mit Schlaflosen oder spiralst in Karriere-Krisen. Wahrscheinlich beides.",
-        severity: "Roast-Intensität",
-        severityLevel: "Scharf 🌶️🌶️🌶️",
+        title: "Wochenübersicht",
+        basedOn: "Basierend auf 127 besuchten Seiten",
+        stats: {
+          totalTime: "Gesamtzeit",
+          totalTimeValue: "14h 32m",
+          topCategory: "Top Kategorie",
+          topCategoryValue: "Entwicklung",
+          bookmarksSaved: "Gespeicherte Lesezeichen",
+          bookmarksSavedValue: "23",
+        },
+        topSites: "Meistbesucht",
+        topSitesList: ["github.com", "stackoverflow.com", "docs.nextjs.org"],
       },
     },
+    contentAnalysisTeaser: {
+      title: "Optionale Inhaltsanalyse",
+      description: "Möchtest du tiefere Einblicke? Aktiviere die KI-gestützte Inhaltsanalyse, um zu verstehen, was du liest, Muster zu entdecken und personalisierte Empfehlungen zu erhalten.",
+      cta: "Mehr erfahren",
+      note: "Du entscheidest, ob und wann du diese Funktion aktivierst. Deine Privatsphäre wird immer respektiert.",
+    },
     cta: {
-      title: "Bereit für die Wahrheit?",
-      description: "Schließe dich Tausenden mutigen Seelen an, die es gewagt haben, ihre wahre Internet-Persönlichkeit zu entdecken.",
-      note: "(Die meisten haben es mit nur leichten Ego-Blessuren überlebt)",
-      button: "🧠 Meine Persönlichkeit analysieren",
-      subtext: "Kostenlos • Keine Anmeldung nötig • Sofortige Ergebnisse",
+      title: "Bereit für mehr Ordnung?",
+      description: "Schließe dich Tausenden von Nutzern an, die die Kontrolle über ihre Lesezeichen und Browsing-Gewohnheiten übernommen haben.",
+      note: "",
+      button: "Kostenloses Konto erstellen",
+      subtext: "Für immer kostenlos • Keine Kreditkarte erforderlich",
     },
     footer: {
       privacy: "Datenschutz",
       terms: "AGB",
       contact: "Kontakt",
-      disclaimer: "⚠️ Haftungsausschluss: Dies dient nur der Unterhaltung. Wir sind keine echten Psychologen, aber wir sind ziemlich gut darin, dich an deinen Lebensentscheidungen zweifeln zu lassen.",
-      copyright: "© 2026 Psychologist. Alle Roasts vorbehalten.",
+      disclaimer: "",
+      copyright: "© 2026 lnkiq.net. Alle Rechte vorbehalten.",
     },
     privacy: {
       title: "Datenschutzerklärung",
-      lastUpdated: "Zuletzt aktualisiert: 27. Januar 2026",
-      intro: "Bei Psychologist nehmen wir deinen Datenschutz ernst (im Gegensatz zu deinem Browserverlauf, den wir gnadenlos beurteilen). Diese Richtlinie erklärt, wie wir deine Daten erheben, verwenden und schützen.",
+      lastUpdated: "Zuletzt aktualisiert: 28. Januar 2026",
+      intro: "Bei lnkiq.net nehmen wir deinen Datenschutz ernst. Diese Richtlinie erklärt, wie wir deine Daten erheben, verwenden und schützen. Du hast immer die Kontrolle über deine Informationen.",
       backToHome: "Zurück zur Startseite",
       dataCollection: {
         title: "Welche Daten wir erheben",
-        description: "Wenn du unsere Browser-Erweiterung verwendest, erheben wir folgende Informationen:",
+        description: "Wenn du unsere Browser-Erweiterung und unseren Dienst nutzt, erheben wir folgende Informationen:",
         items: [
-          "URLs der besuchten Websites (anonymisiert)",
-          "Verweildauer auf jeder Website",
-          "Allgemeine Surfmuster und -gewohnheiten",
-          "Browsertyp und -version",
+          "Lesezeichen, die du speicherst (URL, Titel, Beschreibung)",
+          "Browsing-Aktivitätsdaten (wenn du Aktivitätsverfolgung aktivierst)",
+          "Seiteninhalte für Analyse (nur wenn du Inhaltsanalyse aktivierst)",
+          "Kontoinformationen (E-Mail, Einstellungen)",
         ],
       },
       dataUsage: {
         title: "Wie wir deine Daten verwenden",
-        description: "Wir verwenden deine Browserdaten ausschließlich um:",
+        description: "Wir verwenden deine Daten um:",
         items: [
-          "Deine personalisierte (und brutal ehrliche) Persönlichkeitsanalyse zu erstellen",
-          "Aggregierte, anonymisierte Statistiken zur Verbesserung unserer Roast-Algorithmen zu erstellen",
-          "Dich dazu zu bringen, deine Lebensentscheidungen zu hinterfragen (auf lustige Weise)",
+          "Deine Lesezeichen zu speichern und über Geräte zu synchronisieren",
+          "Dein Aktivitäts-Dashboard und Einblicke zu generieren",
+          "KI-gestützte Inhaltsanalyse bereitzustellen (wenn aktiviert)",
+          "Unseren Service und die Benutzererfahrung zu verbessern",
         ],
       },
       dataStorage: {
-        title: "Datenspeicherung & Aufbewahrung",
-        description: "Deine Browserdaten werden lokal auf deinem Gerät verarbeitet und nur in anonymisierter, aggregierter Form übertragen, um deine Persönlichkeitsanalyse zu erstellen. Wir speichern deinen Browserverlauf nicht auf unseren Servern. Analyseergebnisse werden 30 Tage aufbewahrt und dann automatisch gelöscht.",
+        title: "Datenspeicherung & Sicherheit",
+        description: "Deine Daten werden sicher mit branchenüblicher Verschlüsselung gespeichert. Lesezeichen und Aktivitätsdaten werden auf unseren Servern gespeichert, um die Synchronisation über Geräte zu ermöglichen. Inhaltsanalyse wird sicher verarbeitet, und du kannst deine Daten jederzeit löschen.",
       },
       thirdParties: {
         title: "Weitergabe an Dritte",
-        description: "Wir verkaufen, handeln oder übertragen deine persönlichen Daten nicht an Dritte. Deine peinlichen 3-Uhr-nachts-Wikipedia-Spiralen sind bei uns sicher.",
+        description: "Wir verkaufen deine persönlichen Daten nicht an Dritte. Wir können vertrauenswürdige Dienstleister für Hosting und Analysen nutzen, die alle an strenge Datenschutzvereinbarungen gebunden sind.",
       },
       rights: {
         title: "Deine Rechte",
         description: "Du hast das Recht:",
         items: [
-          "Auf die Daten zuzugreifen, die wir über dich haben",
-          "Die Löschung deiner Daten zu verlangen",
-          "Die Datenerhebung jederzeit abzulehnen",
-          "Deine Daten in einem portablen Format zu exportieren",
+          "Auf alle Daten zuzugreifen, die wir über dich haben",
+          "Deine Lesezeichen und Aktivitätsdaten zu exportieren",
+          "Dein Konto und alle zugehörigen Daten zu löschen",
+          "Aktivitätsverfolgung oder Inhaltsanalyse jederzeit abzulehnen",
         ],
       },
       contact: {
@@ -297,57 +437,115 @@ export const dictionaries = {
     },
     terms: {
       title: "Allgemeine Geschäftsbedingungen",
-      lastUpdated: "Zuletzt aktualisiert: 27. Januar 2026",
-      intro: "Willkommen bei Psychologist! Diese Bedingungen regeln die Nutzung unseres Persönlichkeits-Roast-Dienstes. Durch die Nutzung unseres Dienstes stimmst du zu, (fair) beurteilt und (gnadenlos) geröstet zu werden.",
+      lastUpdated: "Zuletzt aktualisiert: 28. Januar 2026",
+      intro: "Willkommen bei lnkiq.net! Diese Bedingungen regeln die Nutzung unseres Lesezeichen-Management- und Browsing-Analyse-Dienstes.",
       backToHome: "Zurück zur Startseite",
       acceptance: {
         title: "Annahme der Bedingungen",
-        description: "Durch den Zugriff auf oder die Nutzung von Psychologist erklärst du dich mit diesen Nutzungsbedingungen einverstanden. Wenn du mit einem Teil dieser Bedingungen nicht einverstanden bist, darfst du unseren Dienst nicht nutzen. Aber ehrlich gesagt, wenn du unsere Bedingungen nicht verkraftest, verkraftest du wahrscheinlich auch unsere Roasts nicht.",
+        description: "Durch den Zugriff auf oder die Nutzung von lnkiq.net erklärst du dich mit diesen Nutzungsbedingungen einverstanden. Wenn du mit einem Teil dieser Bedingungen nicht einverstanden bist, darfst du unseren Dienst nicht nutzen.",
       },
       service: {
         title: "Beschreibung des Dienstes",
-        description: "Psychologist bietet:",
+        description: "lnkiq.net bietet:",
         items: [
-          "Eine Browser-Erweiterung, die deine Surfmuster analysiert",
-          "KI-generierte Persönlichkeitsanalysen basierend auf deinen Internet-Gewohnheiten",
-          "Unterhaltung durch brutal ehrliche (aber letztlich harmlose) Roasts",
-          "Einen Spiegel deiner digitalen Seele (Ergebnisse können unangenehm sein)",
+          "Eine Browser-Erweiterung zum Speichern und Verwalten von Lesezeichen",
+          "Cloud-Synchronisation für Lesezeichen über Geräte",
+          "Browsing-Aktivitätsverfolgung und Analyse-Dashboard",
+          "Optionale KI-gestützte Inhaltsanalyse für tiefere Einblicke",
         ],
       },
       userResponsibilities: {
         title: "Nutzerpflichten",
         description: "Als Nutzer stimmst du zu:",
         items: [
-          "Den Dienst nur für persönliche Unterhaltungszwecke zu nutzen",
-          "Nicht zu versuchen, die Analyse-Algorithmen zu reverse-engineeren oder zu manipulieren",
-          "Zu akzeptieren, dass unsere Roasts humorvoll gemeint sind und keine professionelle Beratung darstellen",
-          "Humor bezüglich deiner Internet-Gewohnheiten zu haben",
-          "Uns nicht für eventuelle Existenzkrisen verantwortlich zu machen, die durch deine Ergebnisse ausgelöst werden",
+          "Genaue Kontoinformationen anzugeben",
+          "Deine Anmeldedaten sicher zu halten",
+          "Den Dienst in Übereinstimmung mit geltenden Gesetzen zu nutzen",
+          "Nicht zu versuchen, den Dienst zu reverse-engineeren oder zu missbrauchen",
+          "Geistige Eigentumsrechte von Inhalten, die du als Lesezeichen speicherst, zu respektieren",
         ],
       },
       disclaimer: {
-        title: "Unterhaltungs-Haftungsausschluss",
-        description: "Psychologist ist ein Unterhaltungsdienst, KEIN medizinisches oder psychologisches Werkzeug. Unsere Analysen werden von KI zu humoristischen Zwecken erstellt und sollten nicht als professionelle psychologische Bewertungen verstanden werden. Wenn du echte psychische Unterstützung suchst, wende dich bitte an einen zugelassenen Fachmann (einen echten, nicht uns).",
+        title: "Service-Haftungsausschluss",
+        description: "lnkiq.net wird ohne jegliche Garantie bereitgestellt. Obwohl wir nach Zuverlässigkeit streben, können wir keinen unterbrechungsfreien Service garantieren. Inhaltsanalyse-Funktionen sind KI-gestützt und möglicherweise nicht immer genau.",
       },
       intellectualProperty: {
         title: "Geistiges Eigentum",
-        description: "Alle Inhalte, Funktionen und Funktionalitäten von Psychologist — einschließlich, aber nicht beschränkt auf unsere Roast-Algorithmen, witzigen Sprüche und die Fähigkeit, dich an deinen Lebensentscheidungen zweifeln zu lassen — sind unser Eigentum und durch internationale Urheberrechts-, Marken- und andere Gesetze zum Schutz geistigen Eigentums geschützt.",
+        description: "Alle Inhalte, Funktionen und Funktionalitäten von lnkiq.net — einschließlich unserer Software, Design und Marken — sind unser Eigentum und durch internationale Urheberrechts-, Marken- und andere Gesetze zum Schutz geistigen Eigentums geschützt.",
       },
       liability: {
         title: "Haftungsbeschränkung",
-        description: "Psychologist haftet nicht für verletzte Egos, Existenzkrisen, plötzliche Impulse, deinen Browserverlauf zu löschen, oder peinliche Gespräche, die aus dem Teilen deiner Persönlichkeitsanalyse resultieren können. Nutzung auf eigenes emotionales Risiko.",
+        description: "lnkiq.net haftet nicht für indirekte, zufällige, besondere oder Folgeschäden, die sich aus deiner Nutzung des Dienstes ergeben. Unsere Gesamthaftung ist auf den Betrag beschränkt, den du für den Dienst bezahlt hast.",
       },
       termination: {
         title: "Kündigung",
-        description: "Wir behalten uns das Recht vor, deinen Zugang zum Dienst jederzeit ohne vorherige Ankündigung und aus beliebigem Grund zu beenden oder auszusetzen. Du kannst deine Nutzung auch jederzeit durch Deinstallation unserer Erweiterung beenden. Wir versprechen, es nicht persönlich zu nehmen (aber wir werden dich vielleicht ein letztes Mal rösten).",
+        description: "Wir behalten uns das Recht vor, deinen Zugang zum Dienst jederzeit bei Verstößen gegen diese Bedingungen zu beenden oder auszusetzen. Du kannst dein Konto auch jederzeit über deine Einstellungen kündigen.",
       },
       changes: {
         title: "Änderungen der Bedingungen",
-        description: "Wir können diese Bedingungen jederzeit ändern. Die fortgesetzte Nutzung des Dienstes nach Änderungen gilt als Annahme der neuen Bedingungen. Wir werden versuchen, dich über wesentliche Änderungen zu informieren, aber wir empfehlen, gelegentlich vorbeizuschauen — im Gegensatz zu deinem Lesezeichen-Ordner, den du bekanntlich nie aufräumst.",
+        description: "Wir können diese Bedingungen jederzeit ändern. Wir werden dich über wesentliche Änderungen per E-Mail oder In-App-Benachrichtigung informieren. Die fortgesetzte Nutzung des Dienstes nach Änderungen gilt als Annahme der neuen Bedingungen.",
       },
       contact: {
         title: "Kontakt",
         description: "Bei Fragen zu diesen Bedingungen kontaktiere uns bitte unter:",
+      },
+    },
+    contentAnalysis: {
+      title: "Inhaltsanalyse",
+      subtitle: "Verstehe, was du liest, mit KI-gestützten Einblicken",
+      intro: "Inhaltsanalyse ist eine optionale Funktion, die KI nutzt, um die Seiten zu analysieren, die du besuchst, und dir hilft, deine Lesemuster zu verstehen und Einblicke zu entdecken.",
+      backToHome: "Zurück zur Startseite",
+      howItWorks: {
+        title: "So funktioniert's",
+        description: "Wenn aktiviert, verarbeitet unsere KI den Inhalt der Seiten, die du besuchst, um:",
+        items: [
+          "Inhalte nach Thema zu kategorisieren (Technologie, Nachrichten, Unterhaltung, etc.)",
+          "Wichtige Themen und Konzepte aus deiner Lektüre zu extrahieren",
+          "Muster in dem zu identifizieren, was du online konsumierst",
+          "Personalisierte Lese-Einblicke und Vorschläge zu generieren",
+        ],
+      },
+      benefits: {
+        title: "Vorteile",
+        items: [
+          {
+            title: "Verstehe deine Gewohnheiten",
+            description: "Sieh, über welche Themen du am meisten liest.",
+          },
+          {
+            title: "Entdecke Muster",
+            description: "Identifiziere Trends in deiner Lektüre über die Zeit.",
+          },
+          {
+            title: "Smarte Empfehlungen",
+            description: "Erhalte Vorschläge basierend auf deinen Interessen.",
+          },
+          {
+            title: "Bessere Organisation",
+            description: "Automatisches Taggen von Lesezeichen basierend auf Inhalt.",
+          },
+        ],
+      },
+      privacy: {
+        title: "Deine Privatsphäre ist wichtig",
+        description: "Inhaltsanalyse ist vollständig optional. Du entscheidest:",
+        items: [
+          "Jederzeit in deinen Einstellungen aktivieren oder deaktivieren",
+          "Wähle, welche Seiten eingeschlossen oder ausgeschlossen werden",
+          "Lösche alle analysierten Daten, wann immer du willst",
+          "Analyse erfolgt sicher — wir teilen deine Inhalte niemals",
+        ],
+      },
+      toggle: {
+        title: "Du hast die Kontrolle",
+        description: "Schalte Inhaltsanalyse jederzeit ein oder aus. Wenn deaktiviert, speichern wir nur die grundlegenden Lesezeichen-Informationen, die du explizit speicherst.",
+        enabled: "Inhaltsanalyse Aktiviert",
+        disabled: "Inhaltsanalyse Deaktiviert",
+      },
+      cta: {
+        title: "Bereit es auszuprobieren?",
+        button: "Jetzt starten",
+        note: "Aktiviere Inhaltsanalyse in deinen Dashboard-Einstellungen nach der Anmeldung.",
       },
     },
   },
@@ -359,6 +557,12 @@ export interface Dictionary {
   meta: {
     readonly title: string;
     readonly description: string;
+  };
+  nav: {
+    readonly features: string;
+    readonly contentAnalysis: string;
+    readonly privacy: string;
+    readonly terms: string;
   };
   hero: {
     readonly headline: string;
@@ -378,27 +582,44 @@ export interface Dictionary {
     readonly title: string;
     readonly subtitle: string;
     readonly steps: ReadonlyArray<{
-      readonly emoji: string;
+      readonly icon: string;
       readonly step: string;
       readonly title: string;
       readonly description: string;
     }>;
   };
-  sampleRoast: {
+  features: {
+    readonly title: string;
+    readonly subtitle: string;
+    readonly items: ReadonlyArray<{
+      readonly icon: string;
+      readonly title: string;
+      readonly description: string;
+    }>;
+  };
+  dashboard: {
     readonly title: string;
     readonly subtitle: string;
     readonly card: {
       readonly title: string;
       readonly basedOn: string;
-      readonly diagnosis: string;
-      readonly diagnosisText: string;
-      readonly redFlags: string;
-      readonly redFlagsText: string;
-      readonly funFact: string;
-      readonly funFactText: string;
-      readonly severity: string;
-      readonly severityLevel: string;
+      readonly stats: {
+        readonly totalTime: string;
+        readonly totalTimeValue: string;
+        readonly topCategory: string;
+        readonly topCategoryValue: string;
+        readonly bookmarksSaved: string;
+        readonly bookmarksSavedValue: string;
+      };
+      readonly topSites: string;
+      readonly topSitesList: ReadonlyArray<string>;
     };
+  };
+  contentAnalysisTeaser: {
+    readonly title: string;
+    readonly description: string;
+    readonly cta: string;
+    readonly note: string;
   };
   cta: {
     readonly title: string;
@@ -489,6 +710,40 @@ export interface Dictionary {
     readonly contact: {
       readonly title: string;
       readonly description: string;
+    };
+  };
+  contentAnalysis: {
+    readonly title: string;
+    readonly subtitle: string;
+    readonly intro: string;
+    readonly backToHome: string;
+    readonly howItWorks: {
+      readonly title: string;
+      readonly description: string;
+      readonly items: ReadonlyArray<string>;
+    };
+    readonly benefits: {
+      readonly title: string;
+      readonly items: ReadonlyArray<{
+        readonly title: string;
+        readonly description: string;
+      }>;
+    };
+    readonly privacy: {
+      readonly title: string;
+      readonly description: string;
+      readonly items: ReadonlyArray<string>;
+    };
+    readonly toggle: {
+      readonly title: string;
+      readonly description: string;
+      readonly enabled: string;
+      readonly disabled: string;
+    };
+    readonly cta: {
+      readonly title: string;
+      readonly button: string;
+      readonly note: string;
     };
   };
 }
