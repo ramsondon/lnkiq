@@ -1,6 +1,5 @@
 import { getDictionary, type Locale } from "@/i18n/dictionaries";
 import { Navbar } from "@/components/Navbar";
-import { Logo } from "@/components/Logo";
 import { siteConfig } from "@/config/site";
 import { auth } from "@/auth";
 import Link from "next/link";
@@ -124,18 +123,7 @@ export default async function PrivacyPage({
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="px-6 py-8 border-t border-zinc-200 dark:border-zinc-800">
-        <div className="mx-auto max-w-4xl flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <Logo size={24} className="text-sky-500" />
-            <span className="font-bold">{siteConfig.name}</span>
-          </div>
-          <p className="text-sm text-zinc-400">
-            {dict.footer.copyright}
-          </p>
-        </div>
-      </footer>
+      {/* Footer is now included via layout */}
     </div>
   );
 }
