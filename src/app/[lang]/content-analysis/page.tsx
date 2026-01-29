@@ -2,6 +2,7 @@ import { getDictionary, type Locale } from "@/i18n/dictionaries";
 import { Navbar } from "@/components/Navbar";
 import { Logo } from "@/components/Logo";
 import { siteConfig } from "@/config/site";
+import { auth } from "@/auth";
 import Link from "next/link";
 
 export default async function ContentAnalysisPage({
@@ -13,11 +14,22 @@ export default async function ContentAnalysisPage({
   const locale = lang as Locale;
   const dict = getDictionary(locale);
   const content = dict.contentAnalysis;
+  const session = await auth();
 
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Navbar */}
-      <Navbar locale={locale} nav={dict.nav} />
+      <Navbar
+        locale={locale}
+        nav={dict.nav}
+        authLabels={{
+          signIn: dict.auth.signIn.title,
+          dashboard: dict.auth.userMenu.dashboard,
+          settings: dict.auth.userMenu.settings,
+          signOut: dict.auth.userMenu.signOut,
+        }}
+        user={session?.user}
+      />
 
       {/* Hero Section */}
       <section className="relative overflow-hidden px-6 py-16 lg:px-8">
@@ -145,9 +157,12 @@ export default async function ContentAnalysisPage({
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-2xl font-bold mb-4">{content.cta.title}</h2>
           <p className="text-zinc-500 mb-8">{content.cta.note}</p>
-          <button className="gradient-btn rounded-full px-8 py-4 text-lg font-semibold text-white">
+          <Link
+            href={`/${locale}/auth/signin`}
+            className="gradient-btn rounded-full px-8 py-4 text-lg font-semibold text-white inline-block"
+          >
             {content.cta.button}
-          </button>
+          </Link>
         </div>
       </section>
 

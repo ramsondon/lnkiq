@@ -2,6 +2,7 @@ import { getDictionary, type Locale } from "@/i18n/dictionaries";
 import { Navbar } from "@/components/Navbar";
 import { Logo } from "@/components/Logo";
 import { siteConfig } from "@/config/site";
+import { auth } from "@/auth";
 import Link from "next/link";
 
 export default async function TermsPage({
@@ -13,11 +14,22 @@ export default async function TermsPage({
   const locale = lang as Locale;
   const dict = getDictionary(locale);
   const terms = dict.terms;
+  const session = await auth();
 
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Navbar */}
-      <Navbar locale={locale} nav={dict.nav} />
+      <Navbar
+        locale={locale}
+        nav={dict.nav}
+        authLabels={{
+          signIn: dict.auth.signIn.title,
+          dashboard: dict.auth.userMenu.dashboard,
+          settings: dict.auth.userMenu.settings,
+          signOut: dict.auth.userMenu.signOut,
+        }}
+        user={session?.user}
+      />
 
       {/* Content */}
       <main className="mx-auto max-w-4xl px-6 py-16">

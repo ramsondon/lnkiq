@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Logo } from "@/components/Logo";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { UserMenu } from "@/components/auth/UserMenu";
 import { type Locale } from "@/i18n/dictionaries";
 import { siteConfig } from "@/config/site";
 
@@ -15,9 +16,20 @@ interface NavbarProps {
     privacy: string;
     terms: string;
   };
+  authLabels?: {
+    signIn: string;
+    dashboard: string;
+    settings: string;
+    signOut: string;
+  };
+  user?: {
+    name?: string | null;
+    email?: string | null;
+    image?: string | null;
+  } | null;
 }
 
-export function Navbar({ locale, nav }: NavbarProps) {
+export function Navbar({ locale, nav, authLabels, user }: NavbarProps) {
   const pathname = usePathname();
 
   const isActive = (path: string) => {
@@ -54,7 +66,27 @@ export function Navbar({ locale, nav }: NavbarProps) {
           </Link>
         </nav>
 
-        <LanguageSwitcher currentLocale={locale} />
+        <div className="flex items-center gap-4">
+          {user && authLabels ? (
+            <UserMenu
+              user={user}
+              locale={locale}
+              labels={{
+                dashboard: authLabels.dashboard,
+                settings: authLabels.settings,
+                signOut: authLabels.signOut,
+              }}
+            />
+          ) : authLabels ? (
+            <Link
+              href={`/${locale}/auth/signin`}
+              className="px-4 py-2 bg-sky-500 hover:bg-sky-600 text-white text-sm font-medium rounded-lg transition-colors"
+            >
+              {authLabels.signIn}
+            </Link>
+          ) : null}
+          <LanguageSwitcher currentLocale={locale} />
+        </div>
       </div>
     </header>
   );

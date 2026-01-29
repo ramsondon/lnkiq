@@ -1,5 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@/auth';
 import { i18n } from '@/i18n/config';
+import { NextRequest, NextResponse } from 'next/server';
 
 function getLocale(request: NextRequest): string {
   // Check for locale in cookie
@@ -24,7 +25,14 @@ function getLocale(request: NextRequest): string {
   return i18n.defaultLocale;
 }
 
-export function proxy(request: NextRequest) {
+// Protected routes that require authentication
+const protectedPaths = ['/dashboard'];
+
+function isProtectedRoute(pathname: string): boolean {
+  return protectedPaths.some((path) => pathname.includes(path));
+}
+
+export const proxy = auth((request) => {
   const { pathname } = request.nextUrl;
 
   // Check if pathname already has a locale
@@ -32,14 +40,29 @@ export function proxy(request: NextRequest) {
     (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
   );
 
-  if (pathnameHasLocale) return;
+  // Get or determine locale
+  let locale: string = i18n.defaultLocale;
+  if (pathnameHasLocale) {
+    locale = pathname.split('/')[1];
+  } else {
+    locale = getLocale(request);
+  }
 
-  // Redirect to locale-prefixed path
-  const locale = getLocale(request);
-  request.nextUrl.pathname = `/${locale}${pathname}`;
+  // Check if trying to access protected route without auth
+  if (isProtectedRoute(pathname) && !request.auth) {
+    const signInUrl = new URL(`/${locale}/auth/signin`, request.url);
+    signInUrl.searchParams.set('callbackUrl', pathname);
+    return NextResponse.redirect(signInUrl);
+  }
 
-  return NextResponse.redirect(request.nextUrl);
-}
+  // If no locale in path, redirect to locale-prefixed path
+  if (!pathnameHasLocale) {
+    request.nextUrl.pathname = `/${locale}${pathname}`;
+    return NextResponse.redirect(request.nextUrl);
+  }
+
+  return NextResponse.next();
+});
 
 export const config = {
   matcher: [

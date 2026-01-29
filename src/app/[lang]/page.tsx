@@ -44,9 +44,12 @@ export default async function Home({
           </p>
 
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-            <button className="gradient-btn rounded-full px-8 py-4 text-lg font-semibold text-white">
+            <Link
+              href={`/${locale}/auth/signin`}
+              className="gradient-btn rounded-full px-8 py-4 text-lg font-semibold text-white inline-block"
+            >
               {dict.hero.cta}
-            </button>
+            </Link>
             <a
               href="#how-it-works"
               className="text-lg font-medium text-zinc-600 dark:text-zinc-400 hover:text-foreground transition-colors"
@@ -215,9 +218,12 @@ export default async function Home({
             {dict.cta.description}
           </p>
 
-          <button className="gradient-btn rounded-full px-10 py-4 text-lg font-semibold text-white">
+          <Link
+            href={`/${locale}/auth/signin`}
+            className="gradient-btn rounded-full px-10 py-4 text-lg font-semibold text-white inline-block"
+          >
             {dict.cta.button}
-          </button>
+          </Link>
 
         </div>
       </section>

@@ -1,36 +1,128 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# lnkiq.net
+
+A bookmark management and browsing intelligence platform. Store bookmarks via browser plugin or web app, track where you spend your time online, and gain insights with optional AI-powered content analysis.
+
+## Features
+
+- 🔖 **Smart Bookmarks** — Save any page instantly with browser extension
+- 🔄 **Cross-Device Sync** — Access bookmarks from any device
+- 📊 **Activity Timeline** — Track time spent on sites and visualize patterns
+- 🏷️ **Smart Tags** — AI-suggested tags based on content analysis
+- 🔐 **Privacy First** — You control your data, opt-in content analysis
+
+## Tech Stack
+
+- **Framework**: Next.js 16 (App Router)
+- **Database**: Neon PostgreSQL (Serverless)
+- **Auth**: NextAuth.js v5 (Auth.js)
+- **ORM**: Prisma
+- **Styling**: Tailwind CSS
+- **Deployment**: Vercel
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 20+
+- Neon PostgreSQL database (via Vercel integration)
+
+### Installation
 
 ```bash
+# Install dependencies
+npm install
+
+# Copy environment variables
+cp .env.local.example .env.local
+# Edit .env.local with your credentials
+
+# Push database schema
+npx prisma db push
+
+# Run development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to see the app.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment Variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Create a `.env.local` file with:
 
-## Learn More
+```env
+# Database (from Vercel/Neon)
+DATABASE_URL="postgresql://..."
+DATABASE_URL_UNPOOLED="postgresql://..."
 
-To learn more about Next.js, take a look at the following resources:
+# Auth.js (generate with: openssl rand -base64 32)
+AUTH_SECRET="your-secret"
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# OAuth Providers
+AUTH_GITHUB_ID=""
+AUTH_GITHUB_SECRET=""
+AUTH_GOOGLE_ID=""
+AUTH_GOOGLE_SECRET=""
+AUTH_MICROSOFT_ENTRA_ID_ID=""
+AUTH_MICROSOFT_ENTRA_ID_SECRET=""
+AUTH_APPLE_ID=""
+AUTH_APPLE_SECRET=""
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## OAuth Setup
 
-## Deploy on Vercel
+### 1. GitHub (Easiest)
+1. Go to [GitHub Developer Settings](https://github.com/settings/developers)
+2. Click "New OAuth App"
+3. Set Homepage URL: `http://localhost:3000` (dev) / `https://lnkiq.net` (prod)
+4. Set Callback URL: `http://localhost:3000/api/auth/callback/github`
+5. Copy Client ID → `AUTH_GITHUB_ID`
+6. Generate secret → `AUTH_GITHUB_SECRET`
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 2. Google
+1. Go to [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
+2. Create OAuth 2.0 Client ID
+3. Add authorized redirect URI: `https://lnkiq.net/api/auth/callback/google`
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### 3. Microsoft
+1. Go to [Azure Portal](https://portal.azure.com) → App registrations
+2. Register new application
+3. Add redirect URI: `https://lnkiq.net/api/auth/callback/microsoft-entra-id`
+
+### 4. Apple
+1. Go to [Apple Developer](https://developer.apple.com)
+2. Requires Apple Developer account ($99/year)
+3. Create Services ID with Sign in with Apple capability
+
+## Project Structure
+
+```
+src/
+├── app/
+│   ├── [lang]/              # Localized routes (en, de)
+│   │   ├── auth/            # Sign in, error pages
+│   │   ├── dashboard/       # Protected user dashboard
+│   │   ├── content-analysis/
+│   │   ├── privacy/
+│   │   └── terms/
+│   └── api/auth/            # NextAuth API routes
+├── components/
+│   ├── auth/                # Auth UI components
+│   ├── Navbar.tsx
+│   └── Logo.tsx
+├── i18n/                    # Internationalization (EN, DE)
+├── lib/
+│   └── prisma.ts            # Database client
+├── auth.ts                  # NextAuth configuration
+└── proxy.ts                 # Middleware (i18n + auth)
+```
+
+## Deployment
+
+1. Push to GitHub
+2. Connect to Vercel
+3. Add environment variables in Vercel project settings
+4. Deploy!
+
+## License
+
+Private - All rights reserved © 2026 lnkiq.net
