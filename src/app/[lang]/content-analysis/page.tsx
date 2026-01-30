@@ -1,7 +1,6 @@
 import { getDictionary, type Locale } from "@/i18n/dictionaries";
 import { Navbar } from "@/components/Navbar";
 import { Logo } from "@/components/Logo";
-import { siteConfig } from "@/config/site";
 import { auth } from "@/auth";
 import Link from "next/link";
 
