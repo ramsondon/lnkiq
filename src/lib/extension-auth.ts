@@ -1,7 +1,10 @@
 import { NextRequest } from 'next/server';
 import prisma from '@/lib/prisma';
 import { auth } from '@/auth';
-import { AnonymousDevice, User } from '@prisma/client';
+
+// Infer types from Prisma client
+type AnonymousDevice = Awaited<ReturnType<typeof prisma.anonymousDevice.findFirst>> & {};
+type User = Awaited<ReturnType<typeof prisma.user.findFirst>> & {};
 
 const DEVICE_TOKEN_EXPIRY_DAYS = 90;
 

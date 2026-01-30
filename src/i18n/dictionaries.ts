@@ -145,6 +145,11 @@ export const dictionaries = {
         welcome: "Welcome",
         user: "there",
         subtitle: "Here's an overview of your browsing activity",
+        tabs: {
+          overview: "Overview",
+          bookmarks: "Bookmarks",
+          activity: "Activity",
+        },
         stats: {
           bookmarks: "Bookmarks",
           timeTracked: "Time Tracked",
@@ -164,6 +169,66 @@ export const dictionaries = {
           step3: {
             title: "Explore your insights",
             description: "Check back after a few days to see your browsing patterns.",
+          },
+        },
+        recentBookmarks: {
+          title: "Recent Bookmarks",
+          viewAll: "View all",
+          empty: "No bookmarks yet",
+        },
+        topSites: {
+          title: "Top Sites",
+          empty: "No activity recorded",
+        },
+        bookmarks: {
+          title: "Bookmarks",
+          searchPlaceholder: "Search bookmarks...",
+          addBookmark: "Add Bookmark",
+          allTags: "All Tags",
+          edit: "Edit",
+          delete: "Delete",
+          confirmDelete: "Are you sure you want to delete this bookmark?",
+          empty: {
+            title: "No bookmarks yet",
+            description: "Save your first bookmark using the browser extension or add one manually.",
+          },
+          form: {
+            addTitle: "Add Bookmark",
+            editTitle: "Edit Bookmark",
+            url: "URL",
+            title: "Title",
+            description: "Description",
+            tags: "Tags",
+            tagsPlaceholder: "Separate with commas",
+            save: "Save",
+            cancel: "Cancel",
+            saving: "Saving...",
+          },
+        },
+        activity: {
+          title: "Activity",
+          dateRange: {
+            from: "From",
+            to: "To",
+            apply: "Apply",
+            last7Days: "Last 7 days",
+            last30Days: "Last 30 days",
+            thisMonth: "This month",
+          },
+          summary: {
+            totalTime: "Total Time",
+            totalVisits: "Total Visits",
+          },
+          timeline: {
+            visits: "visits",
+            duration: "duration",
+            noTitle: "Untitled page",
+            showMore: "Show details",
+            showLess: "Hide details",
+          },
+          empty: {
+            title: "No activity recorded",
+            description: "Install the browser extension and enable activity tracking to see where you spend your time online.",
           },
         },
       },
@@ -501,6 +566,11 @@ export const dictionaries = {
         welcome: "Willkommen",
         user: "zurück",
         subtitle: "Hier ist eine Übersicht deiner Browsing-Aktivität",
+        tabs: {
+          overview: "Übersicht",
+          bookmarks: "Lesezeichen",
+          activity: "Aktivität",
+        },
         stats: {
           bookmarks: "Lesezeichen",
           timeTracked: "Erfasste Zeit",
@@ -520,6 +590,66 @@ export const dictionaries = {
           step3: {
             title: "Deine Einblicke erkunden",
             description: "Schau nach ein paar Tagen wieder vorbei, um deine Browsing-Muster zu sehen.",
+          },
+        },
+        recentBookmarks: {
+          title: "Neueste Lesezeichen",
+          viewAll: "Alle anzeigen",
+          empty: "Noch keine Lesezeichen",
+        },
+        topSites: {
+          title: "Top Seiten",
+          empty: "Keine Aktivität aufgezeichnet",
+        },
+        bookmarks: {
+          title: "Lesezeichen",
+          searchPlaceholder: "Lesezeichen suchen...",
+          addBookmark: "Lesezeichen hinzufügen",
+          allTags: "Alle Tags",
+          edit: "Bearbeiten",
+          delete: "Löschen",
+          confirmDelete: "Möchtest du dieses Lesezeichen wirklich löschen?",
+          empty: {
+            title: "Noch keine Lesezeichen",
+            description: "Speichere dein erstes Lesezeichen mit der Browser-Extension oder füge eines manuell hinzu.",
+          },
+          form: {
+            addTitle: "Lesezeichen hinzufügen",
+            editTitle: "Lesezeichen bearbeiten",
+            url: "URL",
+            title: "Titel",
+            description: "Beschreibung",
+            tags: "Tags",
+            tagsPlaceholder: "Mit Kommas trennen",
+            save: "Speichern",
+            cancel: "Abbrechen",
+            saving: "Speichert...",
+          },
+        },
+        activity: {
+          title: "Aktivität",
+          dateRange: {
+            from: "Von",
+            to: "Bis",
+            apply: "Anwenden",
+            last7Days: "Letzte 7 Tage",
+            last30Days: "Letzte 30 Tage",
+            thisMonth: "Dieser Monat",
+          },
+          summary: {
+            totalTime: "Gesamtzeit",
+            totalVisits: "Besuche gesamt",
+          },
+          timeline: {
+            visits: "Besuche",
+            duration: "Dauer",
+            noTitle: "Unbenannte Seite",
+            showMore: "Details anzeigen",
+            showLess: "Details ausblenden",
+          },
+          empty: {
+            title: "Keine Aktivität aufgezeichnet",
+            description: "Installiere die Browser-Extension und aktiviere das Aktivitäts-Tracking, um zu sehen, wo du deine Zeit online verbringst.",
           },
         },
       },
@@ -830,6 +960,11 @@ export interface Dictionary {
       readonly welcome: string;
       readonly user: string;
       readonly subtitle: string;
+      readonly tabs: {
+        readonly overview: string;
+        readonly bookmarks: string;
+        readonly activity: string;
+      };
       readonly stats: {
         readonly bookmarks: string;
         readonly timeTracked: string;
@@ -847,6 +982,66 @@ export interface Dictionary {
           readonly description: string;
         };
         readonly step3: {
+          readonly title: string;
+          readonly description: string;
+        };
+      };
+      readonly recentBookmarks: {
+        readonly title: string;
+        readonly viewAll: string;
+        readonly empty: string;
+      };
+      readonly topSites: {
+        readonly title: string;
+        readonly empty: string;
+      };
+      readonly bookmarks: {
+        readonly title: string;
+        readonly searchPlaceholder: string;
+        readonly addBookmark: string;
+        readonly allTags: string;
+        readonly edit: string;
+        readonly delete: string;
+        readonly confirmDelete: string;
+        readonly empty: {
+          readonly title: string;
+          readonly description: string;
+        };
+        readonly form: {
+          readonly addTitle: string;
+          readonly editTitle: string;
+          readonly url: string;
+          readonly title: string;
+          readonly description: string;
+          readonly tags: string;
+          readonly tagsPlaceholder: string;
+          readonly save: string;
+          readonly cancel: string;
+          readonly saving: string;
+        };
+      };
+      readonly activity: {
+        readonly title: string;
+        readonly dateRange: {
+          readonly from: string;
+          readonly to: string;
+          readonly apply: string;
+          readonly last7Days: string;
+          readonly last30Days: string;
+          readonly thisMonth: string;
+        };
+        readonly summary: {
+          readonly totalTime: string;
+          readonly totalVisits: string;
+        };
+        readonly timeline: {
+          readonly visits: string;
+          readonly duration: string;
+          readonly noTitle: string;
+          readonly showMore: string;
+          readonly showLess: string;
+        };
+        readonly empty: {
           readonly title: string;
           readonly description: string;
         };
