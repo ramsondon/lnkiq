@@ -11,17 +11,17 @@ export default function Footer({ locale, dict }: { locale: string; dict: any }) 
             <Logo size={24} className="text-sky-500" />
             <span className="font-bold text-lg">{siteConfig.name}</span>
           </div>
-
+          <div className="flex items-center gap-2">
+            <p className="text-center text-xs text-zinc-400">
+              {dict.footer.copyright}
+            </p>
+          </div>
           <div className="flex items-center gap-6 text-sm text-zinc-500">
             <Link href={`/${locale}/privacy`} className="hover:text-foreground transition-colors">{dict.footer.privacy}</Link>
             <Link href={`/${locale}/terms`} className="hover:text-foreground transition-colors">{dict.footer.terms}</Link>
             <a href={`mailto:${siteConfig.emails.contact}`} className="hover:text-foreground transition-colors">{dict.footer.contact}</a>
           </div>
         </div>
-
-        <p className="mt-8 text-center text-xs text-zinc-400">
-          {dict.footer.copyright}
-        </p>
       </div>
     </footer>
   );
