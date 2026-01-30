@@ -1,7 +1,6 @@
 // Neon PostgreSQL with Prisma
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
 }
 
 datasource db {
@@ -48,8 +47,11 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  accounts Account[]
-  sessions Session[]
+  accounts         Account[]
+  sessions         Session[]
+  bookmarks        Bookmark[]
+  pageVisits       PageVisit[]
+  anonymousDevices AnonymousDevice[]
 }
 
 model VerificationToken {
@@ -59,3 +61,60 @@ model VerificationToken {
 
   @@unique([identifier, token])
 }
+
+model AnonymousDevice {
+  id           String   @id @default(cuid())
+  deviceToken  String   @unique
+  createdAt    DateTime @default(now())
+  expiresAt    DateTime
+  lastActiveAt DateTime @default(now())
+  userId       String?
+
+  user      User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  bookmarks Bookmark[]
+  pageVisits PageVisit[]
+
+  @@index([deviceToken])
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model Bookmark {
+  id          String   @id @default(cuid())
+  url         String
+  title       String
+  description String?
+  tags        String[] @default([])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  userId   String?
+  deviceId String?
+
+  user   User?            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  device AnonymousDevice? @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([deviceId])
+  @@index([url])
+}
+
+model PageVisit {
+  id              String   @id @default(cuid())
+  url             String
+  title           String?
+  visitedAt       DateTime @default(now())
+  durationSeconds Int?
+
+  userId   String?
+  deviceId String?
+
+  user   User?            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  device AnonymousDevice? @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([deviceId])
+  @@index([visitedAt])
+  @@index([url])
+}
+
