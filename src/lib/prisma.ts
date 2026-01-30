@@ -5,7 +5,7 @@ config();
 
 import { neonConfig } from "@neondatabase/serverless";
 import { PrismaNeon } from "@prisma/adapter-neon";
-import { PrismaClient } from "@/generated/prisma/client";
+import { PrismaClient } from "@prisma/client";
 import ws from "ws";
 
 // Setup WebSocket for Neon serverless driver (required for Node.js environment)

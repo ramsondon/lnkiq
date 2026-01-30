@@ -104,17 +104,49 @@ src/
 │   │   ├── content-analysis/
 │   │   ├── privacy/
 │   │   └── terms/
-│   └── api/auth/            # NextAuth API routes
+│   └── api/
+│       ├── auth/            # NextAuth API routes
+│       ├── cron/            # Scheduled jobs
+│       └── v1/extension/    # Browser extension APIs
+│           ├── device/      # Device token management
+│           ├── bookmarks/   # Bookmark CRUD
+│           └── tracking/    # Page visit tracking
 ├── components/
 │   ├── auth/                # Auth UI components
 │   ├── Navbar.tsx
 │   └── Logo.tsx
 ├── i18n/                    # Internationalization (EN, DE)
 ├── lib/
-│   └── prisma.ts            # Database client
+│   ├── prisma.ts            # Database client
+│   ├── cors.ts              # CORS utilities for extension
+│   ├── extension-auth.ts    # Extension auth helpers
+│   └── merge-anonymous-data.ts  # Anonymous-to-user data merge
 ├── auth.ts                  # NextAuth configuration
 └── proxy.ts                 # Middleware (i18n + auth)
 ```
+
+## Browser Extension API
+
+The API supports anonymous usage with a device token that expires after 90 days of inactivity. When users register, their anonymous data is merged into their account.
+
+### Authentication
+
+- **Anonymous**: Include `X-Device-Token` header with device token
+- **Authenticated**: Use session cookies (automatic after OAuth login)
+
+### Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/v1/extension/device` | Create anonymous device token |
+| GET | `/api/v1/extension/device/status` | Get device expiry status |
+| POST | `/api/v1/extension/device/link` | Link device to user account |
+| GET | `/api/v1/extension/bookmarks` | List bookmarks |
+| POST | `/api/v1/extension/bookmarks` | Create bookmark |
+| DELETE | `/api/v1/extension/bookmarks/[id]` | Delete bookmark |
+| POST | `/api/v1/extension/tracking/visit` | Log page visit |
+| PATCH | `/api/v1/extension/tracking/visit/[id]` | Update visit duration |
+| GET | `/api/v1/extension/tracking/visits` | List page visits |
 
 ## Deployment
 
