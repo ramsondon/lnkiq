@@ -141,6 +141,7 @@ The API supports anonymous usage with a device token that expires after 90 days 
 | POST | `/api/v1/extension/device` | Create anonymous device token |
 | GET | `/api/v1/extension/device/status` | Get device expiry status |
 | POST | `/api/v1/extension/device/link` | Link device to user account |
+| GET | `/api/v1/extension/me` | Get user profile (id, name, email, image) |
 | GET | `/api/v1/extension/bookmarks` | List bookmarks |
 | POST | `/api/v1/extension/bookmarks` | Create bookmark |
 | DELETE | `/api/v1/extension/bookmarks/[id]` | Delete bookmark |
