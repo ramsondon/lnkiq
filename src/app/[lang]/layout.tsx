@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "../globals.css";
 import { i18n } from "@/i18n/config";
 import { getDictionary, type Locale } from "@/i18n/dictionaries";
+import Footer from "@/components/Footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -40,6 +41,8 @@ export default async function RootLayout({
   params: Promise<{ lang: string }>;
 }>) {
   const { lang } = await params;
+  const locale = lang as Locale;
+  const dict = getDictionary(locale);
 
   return (
     <html lang={lang}>
@@ -47,6 +50,7 @@ export default async function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {children}
+        <Footer locale={locale} dict={dict} />
       </body>
     </html>
   );

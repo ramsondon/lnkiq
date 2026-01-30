@@ -111,6 +111,88 @@ export const dictionaries = {
       disclaimer: "",
       copyright: "© 2026 lnkiq.net. All rights reserved.",
     },
+    auth: {
+      signIn: {
+        title: "Welcome back",
+        subtitle: "Sign in to access your bookmarks and insights",
+        terms: "By signing in, you agree to our",
+        termsLink: "Terms of Service",
+        and: "and",
+        privacyLink: "Privacy Policy",
+        backToHome: "Back to Home",
+      },
+      providers: {
+        google: "Continue with Google",
+        github: "Continue with GitHub",
+        apple: "Continue with Apple",
+        microsoft: "Continue with Microsoft",
+      },
+      errors: {
+        title: "Authentication Error",
+        configuration: "There is a problem with the server configuration.",
+        accessDenied: "Access denied. You do not have permission to sign in.",
+        verification: "The verification link has expired or has already been used.",
+        default: "An error occurred during authentication. Please try again.",
+        tryAgain: "Try Again",
+        backToHome: "Back to Home",
+      },
+      userMenu: {
+        dashboard: "Dashboard",
+        settings: "Settings",
+        signOut: "Sign Out",
+      },
+      dashboard: {
+        welcome: "Welcome",
+        user: "there",
+        subtitle: "Here's an overview of your browsing activity",
+        stats: {
+          bookmarks: "Bookmarks",
+          timeTracked: "Time Tracked",
+          tags: "Tags",
+        },
+        getStarted: {
+          title: "Get Started",
+          description: "Complete these steps to make the most of lnkiq",
+          step1: {
+            title: "Install the browser extension",
+            description: "Save bookmarks with one click and track your browsing activity.",
+          },
+          step2: {
+            title: "Save your first bookmark",
+            description: "Click the extension icon on any page to save it to your library.",
+          },
+          step3: {
+            title: "Explore your insights",
+            description: "Check back after a few days to see your browsing patterns.",
+          },
+        },
+      },
+      settings: {
+        title: "Settings",
+        backToDashboard: "Back to Dashboard",
+        profile: {
+          title: "Profile",
+        },
+        connectedAccounts: {
+          title: "Connected Accounts",
+          description: "Manage the accounts you use to sign in to lnkiq.",
+          connected: "Connected",
+          notConnected: "Not connected",
+        },
+        dataPrivacy: {
+          title: "Data & Privacy",
+          exportData: "Export your data",
+          exportDescription: "Download all your bookmarks and activity data.",
+          exportButton: "Export",
+        },
+        dangerZone: {
+          title: "Danger Zone",
+          deleteAccount: "Delete account",
+          deleteDescription: "Permanently delete your account and all associated data.",
+          deleteButton: "Delete Account",
+        },
+      },
+    },
     privacy: {
       title: "Privacy Policy",
       lastUpdated: "Last updated: January 28, 2026",
@@ -385,6 +467,88 @@ export const dictionaries = {
       disclaimer: "",
       copyright: "© 2026 lnkiq.net. Alle Rechte vorbehalten.",
     },
+    auth: {
+      signIn: {
+        title: "Willkommen zurück",
+        subtitle: "Melde dich an, um auf deine Lesezeichen und Einblicke zuzugreifen",
+        terms: "Durch die Anmeldung stimmst du unseren",
+        termsLink: "Nutzungsbedingungen",
+        and: "und",
+        privacyLink: "Datenschutzrichtlinie",
+        backToHome: "Zurück zur Startseite",
+      },
+      providers: {
+        google: "Mit Google fortfahren",
+        github: "Mit GitHub fortfahren",
+        apple: "Mit Apple fortfahren",
+        microsoft: "Mit Microsoft fortfahren",
+      },
+      errors: {
+        title: "Authentifizierungsfehler",
+        configuration: "Es gibt ein Problem mit der Serverkonfiguration.",
+        accessDenied: "Zugriff verweigert. Du hast keine Berechtigung, dich anzumelden.",
+        verification: "Der Bestätigungslink ist abgelaufen oder wurde bereits verwendet.",
+        default: "Bei der Authentifizierung ist ein Fehler aufgetreten. Bitte versuche es erneut.",
+        tryAgain: "Erneut versuchen",
+        backToHome: "Zurück zur Startseite",
+      },
+      userMenu: {
+        dashboard: "Dashboard",
+        settings: "Einstellungen",
+        signOut: "Abmelden",
+      },
+      dashboard: {
+        welcome: "Willkommen",
+        user: "zurück",
+        subtitle: "Hier ist eine Übersicht deiner Browsing-Aktivität",
+        stats: {
+          bookmarks: "Lesezeichen",
+          timeTracked: "Erfasste Zeit",
+          tags: "Tags",
+        },
+        getStarted: {
+          title: "Erste Schritte",
+          description: "Führe diese Schritte aus, um das Beste aus lnkiq herauszuholen",
+          step1: {
+            title: "Browser-Extension installieren",
+            description: "Speichere Lesezeichen mit einem Klick und verfolge deine Browsing-Aktivität.",
+          },
+          step2: {
+            title: "Erstes Lesezeichen speichern",
+            description: "Klicke auf das Extension-Symbol auf einer beliebigen Seite, um sie zu speichern.",
+          },
+          step3: {
+            title: "Deine Einblicke erkunden",
+            description: "Schau nach ein paar Tagen wieder vorbei, um deine Browsing-Muster zu sehen.",
+          },
+        },
+      },
+      settings: {
+        title: "Einstellungen",
+        backToDashboard: "Zurück zum Dashboard",
+        profile: {
+          title: "Profil",
+        },
+        connectedAccounts: {
+          title: "Verbundene Konten",
+          description: "Verwalte die Konten, mit denen du dich bei lnkiq anmeldest.",
+          connected: "Verbunden",
+          notConnected: "Nicht verbunden",
+        },
+        dataPrivacy: {
+          title: "Daten & Datenschutz",
+          exportData: "Daten exportieren",
+          exportDescription: "Lade alle deine Lesezeichen und Aktivitätsdaten herunter.",
+          exportButton: "Exportieren",
+        },
+        dangerZone: {
+          title: "Gefahrenzone",
+          deleteAccount: "Konto löschen",
+          deleteDescription: "Lösche dein Konto und alle zugehörigen Daten dauerhaft.",
+          deleteButton: "Konto löschen",
+        },
+      },
+    },
     privacy: {
       title: "Datenschutzerklärung",
       lastUpdated: "Zuletzt aktualisiert: 28. Januar 2026",
@@ -631,6 +795,88 @@ export interface Dictionary {
     readonly contact: string;
     readonly disclaimer: string;
     readonly copyright: string;
+  };
+  auth: {
+    readonly signIn: {
+      readonly title: string;
+      readonly subtitle: string;
+      readonly terms: string;
+      readonly termsLink: string;
+      readonly and: string;
+      readonly privacyLink: string;
+      readonly backToHome: string;
+    };
+    readonly providers: {
+      readonly google: string;
+      readonly github: string;
+      readonly apple: string;
+      readonly microsoft: string;
+    };
+    readonly errors: {
+      readonly title: string;
+      readonly configuration: string;
+      readonly accessDenied: string;
+      readonly verification: string;
+      readonly default: string;
+      readonly tryAgain: string;
+      readonly backToHome: string;
+    };
+    readonly userMenu: {
+      readonly dashboard: string;
+      readonly settings: string;
+      readonly signOut: string;
+    };
+    readonly dashboard: {
+      readonly welcome: string;
+      readonly user: string;
+      readonly subtitle: string;
+      readonly stats: {
+        readonly bookmarks: string;
+        readonly timeTracked: string;
+        readonly tags: string;
+      };
+      readonly getStarted: {
+        readonly title: string;
+        readonly description: string;
+        readonly step1: {
+          readonly title: string;
+          readonly description: string;
+        };
+        readonly step2: {
+          readonly title: string;
+          readonly description: string;
+        };
+        readonly step3: {
+          readonly title: string;
+          readonly description: string;
+        };
+      };
+    };
+    readonly settings: {
+      readonly title: string;
+      readonly backToDashboard: string;
+      readonly profile: {
+        readonly title: string;
+      };
+      readonly connectedAccounts: {
+        readonly title: string;
+        readonly description: string;
+        readonly connected: string;
+        readonly notConnected: string;
+      };
+      readonly dataPrivacy: {
+        readonly title: string;
+        readonly exportData: string;
+        readonly exportDescription: string;
+        readonly exportButton: string;
+      };
+      readonly dangerZone: {
+        readonly title: string;
+        readonly deleteAccount: string;
+        readonly deleteDescription: string;
+        readonly deleteButton: string;
+      };
+    };
   };
   privacy: {
     readonly title: string;
