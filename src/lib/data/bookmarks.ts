@@ -120,6 +120,7 @@ export async function createUserBookmark(
   data: {
     url: string;
     title: string;
+    favicon?: string;
     description?: string;
     tags?: string[];
   }
@@ -128,6 +129,7 @@ export async function createUserBookmark(
     data: {
       url: data.url,
       title: data.title,
+      favicon: data.favicon || null,
       description: data.description || null,
       tags: data.tags || [],
       userId,
@@ -145,6 +147,7 @@ export async function updateUserBookmark(
     url?: string;
     title?: string;
     description?: string;
+    favicon?: string;
     tags?: string[];
   }
 ): Promise<Bookmark | null> {
@@ -163,6 +166,7 @@ export async function updateUserBookmark(
       url: data.url,
       title: data.title,
       description: data.description,
+      favicon: data.favicon,
       tags: data.tags,
     },
   });

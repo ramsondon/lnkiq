@@ -20,7 +20,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     }
 
     const body = await request.json();
-    const { url, title, description, tags } = body;
+    const { url, title, description, favicon, tags } = body;
 
     // Validate URL if provided
     if (url) {
@@ -35,6 +35,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       url,
       title,
       description,
+      favicon,
       tags,
     });
 

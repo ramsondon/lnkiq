@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { url, title, visitedAt } = body;
+    const { url, title, favicon, visitedAt } = body;
 
     if (!url || typeof url !== 'string') {
       return errorResponse(request, 'URL is required', 400);
@@ -32,6 +32,7 @@ export async function POST(request: NextRequest) {
     const data = {
       url,
       title: title || null,
+      favicon: favicon || null,
       visitedAt: visitedAt ? new Date(visitedAt) : new Date(),
       userId: authContext.isAuthenticated && authContext.user ? authContext.user.id : null,
       deviceId: authContext.device && !authContext.isAuthenticated ? authContext.device.id : null,
@@ -42,6 +43,7 @@ export async function POST(request: NextRequest) {
       visitId: pageVisit.id,
       url: pageVisit.url,
       title: pageVisit.title,
+      favicon: pageVisit.favicon,
       visitedAt: pageVisit.visitedAt.toISOString(),
     }
     console.log(response);
