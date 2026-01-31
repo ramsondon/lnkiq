@@ -112,7 +112,7 @@ function validateOpenAPISpec(spec: unknown): { valid: boolean; errors: string[] 
 export async function GET(request: NextRequest) {
   try {
     // Read the static api.json file from the public directory
-    const filePath = path.join(process.cwd(), 'public', 'api2.json');
+    const filePath = path.join(process.cwd(), 'public', 'api.json');
     const fileContent = await fs.readFile(filePath, 'utf-8');
 
     let spec: unknown;
