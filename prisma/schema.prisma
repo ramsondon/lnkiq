@@ -84,6 +84,7 @@ model Bookmark {
   url         String
   title       String
   description String?
+  favicon     String?
   tags        String[] @default([])
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -103,6 +104,7 @@ model PageVisit {
   id              String   @id @default(cuid())
   url             String
   title           String?
+  favicon         String?
   visitedAt       DateTime @default(now())
   durationSeconds Int?
 
