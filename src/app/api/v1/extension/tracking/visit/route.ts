@@ -38,13 +38,14 @@ export async function POST(request: NextRequest) {
     };
 
     const pageVisit = await prisma.pageVisit.create({ data });
-
-    return jsonResponse(request, {
+    let response = {
       visitId: pageVisit.id,
       url: pageVisit.url,
       title: pageVisit.title,
       visitedAt: pageVisit.visitedAt.toISOString(),
-    }, 201);
+    }
+    console.log(response);
+    return jsonResponse(request, response, 201);
   } catch (error) {
     console.error('Error creating page visit:', error);
     return errorResponse(request, 'Failed to create page visit', 500);
