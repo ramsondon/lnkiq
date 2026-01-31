@@ -1,0 +1,1841 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "lnkiq API",
+    "description": "API for the lnkiq browser extension and web application. Provides bookmark management, activity tracking, and device authentication.\n\n## Authentication\n\nThe API supports two authentication methods:\n\n1. **Device Token** - Used by the browser extension. Pass via `X-Device-Token` header.\n2. **Session Cookie** - Used by the web application. Managed automatically by NextAuth.js.\n\n## Rate Limits\n\n| Endpoint | Limit |\n|----------|-------|\n| `POST /extension/device` | 10 per hour per IP |\n| `POST /extension/bookmarks` | 100 per hour |\n| `GET /extension/bookmarks` | 300 per hour |\n| `POST /extension/tracking/visit` | 1000 per hour |\n| `PATCH /extension/tracking/visit/{id}` | 2000 per hour |\n\n## Pagination\n\nList endpoints support offset-based pagination using `limit` and `offset` parameters. The response includes `total` for calculating page count and `hasMore` to indicate if more results exist.\n\n## Error Handling\n\nAll errors return a JSON object with an `error` field containing a human-readable message.",
+    "version": "1.0.0",
+    "contact": {
+      "email": "hello@lnkiq.net",
+      "name": "lnkiq Support",
+      "url": "https://lnkiq.net"
+    },
+    "license": {
+      "name": "Proprietary"
+    },
+    "x-logo": {
+      "url": "https://lnkiq.net/logo.svg"
+    }
+  },
+  "externalDocs": {
+    "description": "Full API Documentation",
+    "url": "https://lnkiq.net/docs/api"
+  },
+  "servers": [
+    {
+      "url": "https://lnkiq.net/api/v1",
+      "description": "Production server"
+    },
+    {
+      "url": "http://localhost:3000/api/v1",
+      "description": "Development server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Device",
+      "description": "Anonymous device management for browser extension. Devices are valid for 90 days and can be linked to user accounts."
+    },
+    {
+      "name": "User",
+      "description": "User profile endpoints for authenticated users."
+    },
+    {
+      "name": "Bookmarks",
+      "description": "Bookmark management for web application (session authenticated)."
+    },
+    {
+      "name": "Extension Bookmarks",
+      "description": "Bookmark management for browser extension (device token authenticated)."
+    },
+    {
+      "name": "Tracking",
+      "description": "Page visit tracking for activity monitoring and analytics."
+    },
+    {
+      "name": "Cron",
+      "description": "Scheduled maintenance tasks. These endpoints are called by automated cron jobs."
+    }
+  ],
+  "paths": {
+    "/extension/device": {
+      "post": {
+        "tags": ["Device"],
+        "summary": "Create anonymous device",
+        "description": "Creates a new anonymous device token. Called on first extension install. The token is valid for 90 days and should be stored securely in the extension's local storage.",
+        "operationId": "createDevice",
+        "responses": {
+          "201": {
+            "description": "Device created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceCreatedResponse"
+                },
+                "example": {
+                  "deviceToken": "dev_a1b2c3d4e5f6g7h8i9j0...",
+                  "expiresAt": "2026-05-01T12:00:00.000Z",
+                  "createdAt": "2026-01-31T12:00:00.000Z"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded (10 per hour per IP)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Rate limit exceeded. Try again later."
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "options": {
+        "tags": ["Device"],
+        "summary": "CORS preflight",
+        "operationId": "devicePreflight",
+        "responses": {
+          "204": {
+            "description": "CORS preflight response"
+          }
+        }
+      }
+    },
+    "/extension/device/status": {
+      "get": {
+        "tags": ["Device"],
+        "summary": "Get device status",
+        "description": "Retrieves the current device status including authentication state, expiry information, and linked user details if applicable.",
+        "operationId": "getDeviceStatus",
+        "security": [
+          {
+            "DeviceToken": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Device status retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceStatusResponse"
+                },
+                "examples": {
+                  "anonymous": {
+                    "summary": "Anonymous device (not linked)",
+                    "value": {
+                      "deviceId": "dev_123abc",
+                      "expiresAt": "2026-05-01T12:00:00.000Z",
+                      "daysRemaining": 73,
+                      "lastActiveAt": "2026-01-31T10:30:00.000Z",
+                      "isLinked": false,
+                      "isAuthenticated": false,
+                      "user": null
+                    }
+                  },
+                  "linked": {
+                    "summary": "Device linked to user account",
+                    "value": {
+                      "deviceId": "dev_123abc",
+                      "expiresAt": "2026-05-01T12:00:00.000Z",
+                      "daysRemaining": 73,
+                      "lastActiveAt": "2026-01-31T10:30:00.000Z",
+                      "isLinked": true,
+                      "isAuthenticated": true,
+                      "user": {
+                        "id": "user_xyz789",
+                        "name": "John Doe",
+                        "email": "john@example.com"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid or expired device token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Invalid or expired device token"
+                }
+              }
+            }
+          }
+        }
+      },
+      "options": {
+        "tags": ["Device"],
+        "summary": "CORS preflight",
+        "operationId": "deviceStatusPreflight",
+        "responses": {
+          "204": {
+            "description": "CORS preflight response"
+          }
+        }
+      }
+    },
+    "/extension/device/link": {
+      "post": {
+        "tags": ["Device"],
+        "summary": "Link device to user account",
+        "description": "Links an anonymous device to an authenticated user account. Requires both session auth (user must be logged in on website) and X-Device-Token header. All anonymous bookmarks and visit history are merged into the user's account.",
+        "operationId": "linkDevice",
+        "security": [
+          {
+            "DeviceToken": [],
+            "SessionCookie": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Device linked successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceLinkResponse"
+                },
+                "example": {
+                  "message": "Device linked successfully",
+                  "deviceId": "dev_123abc",
+                  "bookmarksMerged": 15,
+                  "visitsMerged": 142
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "X-Device-Token header required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "X-Device-Token header required"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required (user must be logged in)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Authentication required"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Device not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Device not found"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Device already linked to another user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Device already linked to another user"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Device token expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Device token expired"
+                }
+              }
+            }
+          }
+        }
+      },
+      "options": {
+        "tags": ["Device"],
+        "summary": "CORS preflight",
+        "operationId": "deviceLinkPreflight",
+        "responses": {
+          "204": {
+            "description": "CORS preflight response"
+          }
+        }
+      }
+    },
+    "/extension/me": {
+      "get": {
+        "tags": ["User"],
+        "summary": "Get user profile",
+        "description": "Retrieves the authenticated user's profile information. The device must be linked to an account (returns 403 if anonymous).",
+        "operationId": "getMe",
+        "security": [
+          {
+            "DeviceToken": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User profile retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserProfile"
+                },
+                "example": {
+                  "id": "user_xyz789",
+                  "name": "John Doe",
+                  "email": "john@example.com",
+                  "image": "https://lnkiq.net/avatars/user_xyz789.jpg"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid or expired device token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Device not linked to an account",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Device not linked to an account"
+                }
+              }
+            }
+          }
+        }
+      },
+      "options": {
+        "tags": ["User"],
+        "summary": "CORS preflight",
+        "operationId": "mePreflight",
+        "responses": {
+          "204": {
+            "description": "CORS preflight response"
+          }
+        }
+      }
+    },
+    "/bookmarks": {
+      "get": {
+        "tags": ["Bookmarks"],
+        "summary": "List bookmarks",
+        "description": "List bookmarks for authenticated user with optional search, tag filtering, and pagination.",
+        "operationId": "listBookmarks",
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Search term to filter bookmarks. Searches in title, description, and URL (case-insensitive).",
+            "schema": {
+              "type": "string",
+              "example": "react tutorial"
+            }
+          },
+          {
+            "name": "tags",
+            "in": "query",
+            "description": "Comma-separated list of tags to filter by. Returns bookmarks matching ANY of the specified tags.",
+            "schema": {
+              "type": "string",
+              "example": "javascript,react,frontend"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of bookmarks to return.",
+            "schema": {
+              "type": "integer",
+              "default": 20,
+              "minimum": 1,
+              "maximum": 100,
+              "example": 20
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Number of bookmarks to skip for pagination. Use with `limit` to paginate results.",
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "minimum": 0,
+              "example": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Bookmarks retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedBookmarkListResponse"
+                },
+                "example": {
+                  "bookmarks": [
+                    {
+                      "id": "bm_abc123",
+                      "url": "https://react.dev/learn",
+                      "title": "React Documentation",
+                      "description": "Official React learning guide",
+                      "tags": ["react", "javascript", "frontend"],
+                      "createdAt": "2026-01-15T10:30:00.000Z",
+                      "updatedAt": "2026-01-15T10:30:00.000Z"
+                    }
+                  ],
+                  "total": 42,
+                  "limit": 20,
+                  "offset": 0,
+                  "hasMore": true
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Bookmarks"],
+        "summary": "Create bookmark",
+        "description": "Create a new bookmark for the authenticated user.",
+        "operationId": "createBookmark",
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBookmarkRequest"
+              },
+              "example": {
+                "url": "https://react.dev/learn",
+                "title": "React Documentation",
+                "description": "Official React learning guide",
+                "tags": ["react", "javascript", "frontend"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Bookmark created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Bookmark"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body (missing URL/title or invalid URL format)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "missingUrl": {
+                    "summary": "Missing URL",
+                    "value": { "error": "URL is required" }
+                  },
+                  "invalidUrl": {
+                    "summary": "Invalid URL format",
+                    "value": { "error": "Invalid URL format" }
+                  },
+                  "missingTitle": {
+                    "summary": "Missing title",
+                    "value": { "error": "Title is required" }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bookmarks/{id}": {
+      "patch": {
+        "tags": ["Bookmarks"],
+        "summary": "Update bookmark",
+        "description": "Update an existing bookmark. Only the fields provided will be updated (partial update).",
+        "operationId": "updateBookmark",
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Bookmark ID",
+            "schema": {
+              "type": "string",
+              "example": "bm_abc123"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateBookmarkRequest"
+              },
+              "example": {
+                "title": "Updated Title",
+                "tags": ["updated", "tags"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Bookmark updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Bookmark"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid URL format",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Bookmark not found or not owned by user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Bookmarks"],
+        "summary": "Delete bookmark",
+        "description": "Permanently delete a bookmark.",
+        "operationId": "deleteBookmark",
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Bookmark ID",
+            "schema": {
+              "type": "string",
+              "example": "bm_abc123"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Bookmark deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageResponse"
+                },
+                "example": {
+                  "message": "Bookmark deleted"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Bookmark not found or not owned by user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tracking/visits": {
+      "get": {
+        "tags": ["Tracking"],
+        "summary": "List page visits (web)",
+        "description": "List page visits for authenticated user with optional date range filtering and pagination. Returns visits in reverse chronological order. This endpoint is for the web application (session authenticated).",
+        "operationId": "listWebVisits",
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "description": "Start date filter (inclusive). Only return visits on or after this date. ISO 8601 format.",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "example": "2026-01-01T00:00:00.000Z"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "description": "End date filter (inclusive). Only return visits on or before this date. ISO 8601 format.",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "example": "2026-01-31T23:59:59.999Z"
+            }
+          },
+          {
+            "name": "url",
+            "in": "query",
+            "description": "Filter visits by URL (partial match, case-insensitive).",
+            "schema": {
+              "type": "string",
+              "example": "github.com"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of visits to return. Capped at 500.",
+            "schema": {
+              "type": "integer",
+              "default": 50,
+              "minimum": 1,
+              "maximum": 500,
+              "example": 50
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Number of visits to skip for pagination.",
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "minimum": 0,
+              "example": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Visits retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedVisitListResponse"
+                },
+                "example": {
+                  "visits": [
+                    {
+                      "id": "visit_xyz789",
+                      "url": "https://github.com/vercel/next.js",
+                      "title": "Next.js Repository",
+                      "visitedAt": "2026-01-31T10:30:00.000Z",
+                      "durationSeconds": 245
+                    },
+                    {
+                      "id": "visit_abc123",
+                      "url": "https://react.dev/learn",
+                      "title": "React Documentation",
+                      "visitedAt": "2026-01-31T09:15:00.000Z",
+                      "durationSeconds": 127
+                    }
+                  ],
+                  "total": 1842,
+                  "limit": 50,
+                  "offset": 0,
+                  "hasMore": true
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/extension/bookmarks": {
+      "get": {
+        "tags": ["Extension Bookmarks"],
+        "summary": "List bookmarks",
+        "description": "List all bookmarks for the authenticated user or anonymous device. Returns bookmarks in reverse chronological order.",
+        "operationId": "listExtensionBookmarks",
+        "security": [
+          {
+            "DeviceToken": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Bookmarks retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExtensionBookmarkListResponse"
+                },
+                "example": {
+                  "bookmarks": [
+                    {
+                      "id": "bm_abc123",
+                      "url": "https://react.dev/learn",
+                      "title": "React Documentation",
+                      "description": "Official React learning guide",
+                      "tags": ["react", "javascript"],
+                      "createdAt": "2026-01-15T10:30:00.000Z",
+                      "updatedAt": "2026-01-15T10:30:00.000Z"
+                    }
+                  ],
+                  "count": 1
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Extension Bookmarks"],
+        "summary": "Create bookmark",
+        "description": "Create a new bookmark from the browser extension.",
+        "operationId": "createExtensionBookmark",
+        "security": [
+          {
+            "DeviceToken": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBookmarkRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Bookmark created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Bookmark"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "options": {
+        "tags": ["Extension Bookmarks"],
+        "summary": "CORS preflight",
+        "operationId": "extensionBookmarksPreflight",
+        "responses": {
+          "204": {
+            "description": "CORS preflight response"
+          }
+        }
+      }
+    },
+    "/extension/bookmarks/{id}": {
+      "delete": {
+        "tags": ["Extension Bookmarks"],
+        "summary": "Delete bookmark",
+        "description": "Delete a bookmark by ID. You can only delete bookmarks you own.",
+        "operationId": "deleteExtensionBookmark",
+        "security": [
+          {
+            "DeviceToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Bookmark ID",
+            "schema": {
+              "type": "string",
+              "example": "bm_abc123"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Bookmark deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not authorized to delete this bookmark",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Bookmark not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "options": {
+        "tags": ["Extension Bookmarks"],
+        "summary": "CORS preflight",
+        "operationId": "extensionBookmarkByIdPreflight",
+        "responses": {
+          "204": {
+            "description": "CORS preflight response"
+          }
+        }
+      }
+    },
+    "/extension/tracking/visit": {
+      "post": {
+        "tags": ["Tracking"],
+        "summary": "Log page visit",
+        "description": "Records a new page visit for activity tracking. Call this when the user navigates to a new page. Use the returned `visitId` to update the duration when the user leaves the page.",
+        "operationId": "logVisit",
+        "security": [
+          {
+            "DeviceToken": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateVisitRequest"
+              },
+              "example": {
+                "url": "https://example.com/article",
+                "title": "Interesting Article",
+                "visitedAt": "2026-01-31T10:30:00.000Z"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Visit logged successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VisitResponse"
+                },
+                "example": {
+                  "visitId": "visit_xyz789",
+                  "url": "https://example.com/article",
+                  "title": "Interesting Article",
+                  "visitedAt": "2026-01-31T10:30:00.000Z"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "options": {
+        "tags": ["Tracking"],
+        "summary": "CORS preflight",
+        "operationId": "trackingVisitPreflight",
+        "responses": {
+          "204": {
+            "description": "CORS preflight response"
+          }
+        }
+      }
+    },
+    "/extension/tracking/visit/{id}": {
+      "patch": {
+        "tags": ["Tracking"],
+        "summary": "Update visit duration",
+        "description": "Updates the duration of a visit. Call this when the user leaves the page, the tab becomes hidden, or periodically during long visits. Use `fetch` with `keepalive: true` for reliable delivery on page close.",
+        "operationId": "updateVisitDuration",
+        "security": [
+          {
+            "DeviceToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Visit ID (returned from POST /extension/tracking/visit)",
+            "schema": {
+              "type": "string",
+              "example": "visit_xyz789"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateVisitDurationRequest"
+              },
+              "example": {
+                "durationSeconds": 127
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Visit duration updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VisitDurationResponse"
+                },
+                "example": {
+                  "visitId": "visit_xyz789",
+                  "url": "https://example.com/article",
+                  "durationSeconds": 127
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid durationSeconds (must be a non-negative number)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Valid durationSeconds is required"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not authorized to update this visit",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Page visit not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "options": {
+        "tags": ["Tracking"],
+        "summary": "CORS preflight",
+        "operationId": "trackingVisitByIdPreflight",
+        "responses": {
+          "204": {
+            "description": "CORS preflight response"
+          }
+        }
+      }
+    },
+    "/extension/tracking/visits": {
+      "get": {
+        "tags": ["Tracking"],
+        "summary": "List page visits (extension)",
+        "description": "List page visits for the device/user with optional date range filtering and pagination. Returns visits in reverse chronological order.",
+        "operationId": "listExtensionVisits",
+        "security": [
+          {
+            "DeviceToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "description": "Start date filter (inclusive). Only return visits on or after this date. ISO 8601 format.",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "example": "2026-01-01T00:00:00.000Z"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "description": "End date filter (inclusive). Only return visits on or before this date. ISO 8601 format.",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "example": "2026-01-31T23:59:59.999Z"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of visits to return. Capped at 500.",
+            "schema": {
+              "type": "integer",
+              "default": 100,
+              "minimum": 1,
+              "maximum": 500,
+              "example": 100
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Number of visits to skip for pagination.",
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "minimum": 0,
+              "example": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Visits retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VisitListResponse"
+                },
+                "example": {
+                  "visits": [
+                    {
+                      "id": "visit_xyz789",
+                      "url": "https://example.com/article",
+                      "title": "Interesting Article",
+                      "visitedAt": "2026-01-31T10:30:00.000Z",
+                      "durationSeconds": 127
+                    }
+                  ],
+                  "count": 1,
+                  "total": 142,
+                  "limit": 100,
+                  "offset": 0
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "options": {
+        "tags": ["Tracking"],
+        "summary": "CORS preflight",
+        "operationId": "trackingVisitsPreflight",
+        "responses": {
+          "204": {
+            "description": "CORS preflight response"
+          }
+        }
+      }
+    },
+    "/cron/cleanup-expired-devices": {
+      "get": {
+        "tags": ["Cron"],
+        "summary": "Cleanup expired devices",
+        "description": "Cleanup expired anonymous devices and their associated data (bookmarks, visits). This endpoint is called daily by a cron job at 3:00 AM UTC. Devices expire 90 days after creation if not linked to a user account.",
+        "operationId": "cleanupExpiredDevices",
+        "security": [
+          {
+            "CronSecret": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cleanup completed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CleanupResponse"
+                },
+                "example": {
+                  "success": true,
+                  "deletedDevices": 23,
+                  "timestamp": "2026-01-31T03:00:00.000Z"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized (missing or invalid CRON_SECRET)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "DeviceToken": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-Device-Token",
+        "description": "Anonymous device token for browser extension authentication. Obtain via `POST /extension/device`. Valid for 90 days."
+      },
+      "SessionCookie": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "authjs.session-token",
+        "description": "Session cookie for web authentication. Managed automatically by NextAuth.js when user logs in."
+      },
+      "CronSecret": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Bearer token for cron job authentication. Set via CRON_SECRET environment variable."
+      }
+    },
+    "schemas": {
+      "ErrorResponse": {
+        "type": "object",
+        "required": ["error"],
+        "properties": {
+          "error": {
+            "type": "string",
+            "description": "Human-readable error message",
+            "example": "Invalid or expired device token"
+          }
+        }
+      },
+      "MessageResponse": {
+        "type": "object",
+        "required": ["message"],
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Success message",
+            "example": "Bookmark deleted"
+          }
+        }
+      },
+      "DeviceCreatedResponse": {
+        "type": "object",
+        "required": ["deviceToken", "expiresAt", "createdAt"],
+        "properties": {
+          "deviceToken": {
+            "type": "string",
+            "description": "The device token to store and use for future requests",
+            "example": "dev_a1b2c3d4e5f6g7h8i9j0..."
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the token expires (90 days from creation)"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the device was created"
+          }
+        }
+      },
+      "DeviceStatusResponse": {
+        "type": "object",
+        "required": ["isLinked", "isAuthenticated"],
+        "properties": {
+          "deviceId": {
+            "type": "string",
+            "description": "Device ID"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the device token expires"
+          },
+          "daysRemaining": {
+            "type": "integer",
+            "description": "Days until token expiration (useful for showing renewal prompts)",
+            "minimum": 0,
+            "maximum": 90
+          },
+          "lastActiveAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last activity timestamp"
+          },
+          "isLinked": {
+            "type": "boolean",
+            "description": "Whether device is linked to a user account"
+          },
+          "isAuthenticated": {
+            "type": "boolean",
+            "description": "Whether user is authenticated (always true if isLinked is true)"
+          },
+          "user": {
+            "type": "object",
+            "nullable": true,
+            "description": "User details if device is linked",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string",
+                "nullable": true
+              },
+              "email": {
+                "type": "string",
+                "nullable": true
+              }
+            }
+          }
+        }
+      },
+      "DeviceLinkResponse": {
+        "type": "object",
+        "required": ["message", "deviceId", "bookmarksMerged", "visitsMerged"],
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Success message"
+          },
+          "deviceId": {
+            "type": "string",
+            "description": "Device ID"
+          },
+          "bookmarksMerged": {
+            "type": "integer",
+            "description": "Number of anonymous bookmarks transferred to user account",
+            "minimum": 0
+          },
+          "visitsMerged": {
+            "type": "integer",
+            "description": "Number of anonymous visit records transferred to user account",
+            "minimum": 0
+          }
+        }
+      },
+      "UserProfile": {
+        "type": "object",
+        "required": ["id"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "User's unique ID"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true,
+            "description": "User's display name"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "nullable": true,
+            "description": "User's email address"
+          },
+          "image": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "URL to user's avatar image"
+          }
+        }
+      },
+      "Bookmark": {
+        "type": "object",
+        "required": ["id", "url", "title", "tags", "createdAt", "updatedAt"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique bookmark ID",
+            "example": "bm_abc123"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Bookmarked URL",
+            "example": "https://react.dev/learn"
+          },
+          "title": {
+            "type": "string",
+            "description": "Page title",
+            "example": "React Documentation"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true,
+            "description": "Optional user-provided description",
+            "example": "Official React learning guide"
+          },
+          "favicon": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "URL to the page favicon"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Array of tag labels for organization",
+            "example": ["react", "javascript", "frontend"]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the bookmark was created"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the bookmark was last updated"
+          }
+        }
+      },
+      "CreateBookmarkRequest": {
+        "type": "object",
+        "required": ["url", "title"],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "The URL to bookmark (must be a valid URL)",
+            "example": "https://react.dev/learn"
+          },
+          "title": {
+            "type": "string",
+            "description": "Page title",
+            "minLength": 1,
+            "example": "React Documentation"
+          },
+          "description": {
+            "type": "string",
+            "description": "Optional description",
+            "example": "Official React learning guide"
+          },
+          "favicon": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL to the page favicon"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Array of tag labels",
+            "example": ["react", "javascript"]
+          }
+        }
+      },
+      "UpdateBookmarkRequest": {
+        "type": "object",
+        "description": "All fields are optional. Only provided fields will be updated.",
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Updated URL"
+          },
+          "title": {
+            "type": "string",
+            "description": "Updated title"
+          },
+          "description": {
+            "type": "string",
+            "description": "Updated description"
+          },
+          "favicon": {
+            "type": "string",
+            "format": "uri",
+            "description": "Updated favicon URL"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Updated tags (replaces existing tags)"
+          }
+        }
+      },
+      "PaginatedBookmarkListResponse": {
+        "type": "object",
+        "required": ["bookmarks", "total", "limit", "offset"],
+        "properties": {
+          "bookmarks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Bookmark"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "Total number of bookmarks matching the filter",
+            "minimum": 0
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Limit used for this query"
+          },
+          "offset": {
+            "type": "integer",
+            "description": "Offset used for this query"
+          },
+          "hasMore": {
+            "type": "boolean",
+            "description": "Whether there are more results beyond this page"
+          }
+        }
+      },
+      "ExtensionBookmarkListResponse": {
+        "type": "object",
+        "required": ["bookmarks", "count"],
+        "properties": {
+          "bookmarks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Bookmark"
+            }
+          },
+          "count": {
+            "type": "integer",
+            "description": "Number of bookmarks returned",
+            "minimum": 0
+          }
+        }
+      },
+      "CreateVisitRequest": {
+        "type": "object",
+        "required": ["url"],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "The visited URL (tracking parameters should be stripped)",
+            "example": "https://example.com/article"
+          },
+          "title": {
+            "type": "string",
+            "description": "Page title",
+            "example": "Interesting Article"
+          },
+          "visitedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the visit occurred. Defaults to server time if not provided.",
+            "example": "2026-01-31T10:30:00.000Z"
+          }
+        }
+      },
+      "VisitResponse": {
+        "type": "object",
+        "required": ["visitId", "url", "visitedAt"],
+        "properties": {
+          "visitId": {
+            "type": "string",
+            "description": "Visit ID - use this to update duration later",
+            "example": "visit_xyz789"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "The visited URL"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true,
+            "description": "Page title"
+          },
+          "favicon": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "URL to the page favicon"
+          },
+          "visitedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the visit started"
+          }
+        }
+      },
+      "UpdateVisitDurationRequest": {
+        "type": "object",
+        "required": ["durationSeconds"],
+        "properties": {
+          "durationSeconds": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Total time spent on page in seconds. Value is rounded to nearest integer.",
+            "example": 127
+          }
+        }
+      },
+      "VisitDurationResponse": {
+        "type": "object",
+        "required": ["visitId", "url", "durationSeconds"],
+        "properties": {
+          "visitId": {
+            "type": "string",
+            "description": "Visit ID"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "The visited URL"
+          },
+          "durationSeconds": {
+            "type": "integer",
+            "description": "Total time spent on page in seconds",
+            "minimum": 0
+          }
+        }
+      },
+      "Visit": {
+        "type": "object",
+        "required": ["id", "url", "visitedAt"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Visit ID"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "The visited URL"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true,
+            "description": "Page title"
+          },
+          "favicon": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "URL to the page favicon"
+          },
+          "visitedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the visit occurred"
+          },
+          "durationSeconds": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Time spent on page in seconds (null if not yet updated)",
+            "minimum": 0
+          }
+        }
+      },
+      "VisitListResponse": {
+        "type": "object",
+        "required": ["visits", "count", "total", "limit", "offset"],
+        "properties": {
+          "visits": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Visit"
+            }
+          },
+          "count": {
+            "type": "integer",
+            "description": "Number of visits in this response",
+            "minimum": 0
+          },
+          "total": {
+            "type": "integer",
+            "description": "Total number of visits matching the filter (use for pagination)",
+            "minimum": 0
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Limit used for this query (capped at 500)"
+          },
+          "offset": {
+            "type": "integer",
+            "description": "Offset used for this query"
+          }
+        }
+      },
+      "PaginatedVisitListResponse": {
+        "type": "object",
+        "required": ["visits", "total", "limit", "offset"],
+        "properties": {
+          "visits": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Visit"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "Total number of visits matching the filter",
+            "minimum": 0
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Limit used for this query (capped at 500)"
+          },
+          "offset": {
+            "type": "integer",
+            "description": "Offset used for this query"
+          },
+          "hasMore": {
+            "type": "boolean",
+            "description": "Whether there are more results beyond this page"
+          }
+        }
+      },
+      "CleanupResponse": {
+        "type": "object",
+        "required": ["success", "deletedDevices", "timestamp"],
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Whether cleanup was successful"
+          },
+          "deletedDevices": {
+            "type": "integer",
+            "description": "Number of expired devices deleted",
+            "minimum": 0
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the cleanup was performed"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { DayGroupData } from "@/types/dashboard";
 
 // Format seconds to human readable duration (client-side version)
@@ -100,9 +101,11 @@ export function ActivityTimeline({ dayGroups, labels, locale }: ActivityTimeline
                   key={domain.domain}
                   className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-100 dark:bg-zinc-800"
                 >
-                  <img
+                  <Image
                     src={`https://www.google.com/s2/favicons?domain=${domain.domain}&sz=16`}
                     alt=""
+                    width={16}
+                    height={16}
                     className="w-4 h-4"
                   />
                   <span className="text-sm font-medium">{domain.domain}</span>
@@ -133,9 +136,11 @@ export function ActivityTimeline({ dayGroups, labels, locale }: ActivityTimeline
 
                   return (
                     <div key={visit.id} className="p-4 flex items-center gap-3">
-                      <img
+                      <Image
                         src={`https://www.google.com/s2/favicons?domain=${domain}&sz=24`}
                         alt=""
+                        width={24}
+                        height={24}
                         className="w-6 h-6 rounded"
                       />
                       <div className="flex-1 min-w-0">

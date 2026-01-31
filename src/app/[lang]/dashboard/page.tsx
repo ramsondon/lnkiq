@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
 import { getDictionary, type Locale } from "@/i18n/dictionaries";
 import Link from "next/link";
+import Image from "next/image";
 import { getBookmarkStats } from "@/lib/data/bookmarks";
 import { getActivityStats, formatDuration } from "@/lib/data/page-visits";
 import { StatsCard } from "@/components/dashboard/StatsCard";
@@ -130,9 +131,11 @@ export default async function DashboardPage({
                     rel="noopener noreferrer"
                     className="flex items-center gap-3 p-2 -mx-2 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
                   >
-                    <img
+                    <Image
                       src={`https://www.google.com/s2/favicons?domain=${domain}&sz=24`}
                       alt=""
+                      width={20}
+                      height={20}
                       className="w-5 h-5 rounded"
                     />
                     <div className="flex-1 min-w-0">
@@ -166,9 +169,11 @@ export default async function DashboardPage({
                   <span className="w-5 h-5 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-xs font-medium">
                     {index + 1}
                   </span>
-                  <img
+                  <Image
                     src={`https://www.google.com/s2/favicons?domain=${domain.domain}&sz=24`}
                     alt=""
+                    width={20}
+                    height={20}
                     className="w-5 h-5 rounded"
                   />
                   <div className="flex-1 min-w-0">

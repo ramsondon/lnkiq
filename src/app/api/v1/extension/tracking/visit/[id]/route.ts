@@ -22,7 +22,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
     const body = await request.json();
     const { durationSeconds } = body;
-
+    console.log("visit duration update", id, durationSeconds);
     if (typeof durationSeconds !== 'number' || durationSeconds < 0) {
       return errorResponse(request, 'Valid durationSeconds is required', 400);
     }

@@ -19,6 +19,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const from = searchParams.get('from');
     const to = searchParams.get('to');
+    const url = searchParams.get('url');
     const limit = parseInt(searchParams.get('limit') || '100', 10);
     const offset = parseInt(searchParams.get('offset') || '0', 10);
 
@@ -27,6 +28,7 @@ export async function GET(request: NextRequest) {
       userId?: string;
       deviceId?: string;
       visitedAt?: { gte?: Date; lte?: Date };
+      url?: { contains: string; mode: 'insensitive' };
     } = authContext.isAuthenticated && authContext.user
       ? { userId: authContext.user.id }
       : { deviceId: authContext.device!.id };
@@ -40,6 +42,11 @@ export async function GET(request: NextRequest) {
       if (to) {
         where.visitedAt.lte = new Date(to);
       }
+    }
+
+    // Add URL partial match filter
+    if (url) {
+      where.url = { contains: url, mode: 'insensitive' };
     }
 
     const [visits, total] = await Promise.all([
@@ -57,6 +64,7 @@ export async function GET(request: NextRequest) {
         id: v.id,
         url: v.url,
         title: v.title,
+        favicon: v.favicon,
         visitedAt: v.visitedAt.toISOString(),
         durationSeconds: v.durationSeconds,
       })),

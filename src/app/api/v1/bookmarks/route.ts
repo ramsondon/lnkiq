@@ -28,7 +28,21 @@ export async function GET(request: NextRequest) {
       offset,
     });
 
-    return NextResponse.json(result);
+    return NextResponse.json({
+      bookmarks: result.bookmarks.map((b) => ({
+        id: b.id,
+        url: b.url,
+        title: b.title,
+        description: b.description,
+        tags: b.tags,
+        createdAt: b.createdAt.toISOString(),
+        updatedAt: b.updatedAt.toISOString(),
+      })),
+      total: result.total,
+      limit: result.limit,
+      offset: result.offset,
+      hasMore: result.offset + result.bookmarks.length < result.total,
+    });
   } catch (error) {
     console.error("Error fetching bookmarks:", error);
     return NextResponse.json({ error: "Failed to fetch bookmarks" }, { status: 500 });
@@ -48,7 +62,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { url, title, description, tags } = body;
+    const { url, title, description, favicon, tags } = body;
 
     if (!url || typeof url !== "string") {
       return NextResponse.json({ error: "URL is required" }, { status: 400 });
@@ -69,6 +83,7 @@ export async function POST(request: NextRequest) {
       url,
       title,
       description,
+      favicon,
       tags,
     });
 

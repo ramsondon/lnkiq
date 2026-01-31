@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { url, title, description, tags } = body;
+    const { url, title, description, favicon, tags } = body;
 
     if (!url || typeof url !== 'string') {
       return errorResponse(request, 'URL is required', 400);
@@ -88,6 +88,7 @@ export async function POST(request: NextRequest) {
       url: bookmark.url,
       title: bookmark.title,
       description: bookmark.description,
+      favicon: bookmark.favicon,
       tags: bookmark.tags,
       createdAt: bookmark.createdAt.toISOString(),
       updatedAt: bookmark.updatedAt.toISOString(),
