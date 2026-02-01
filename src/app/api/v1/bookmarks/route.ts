@@ -34,6 +34,7 @@ export async function GET(request: NextRequest) {
         url: b.url,
         title: b.title,
         description: b.description,
+        favicon: b.favicon,
         tags: b.tags,
         createdAt: b.createdAt.toISOString(),
         updatedAt: b.updatedAt.toISOString(),
@@ -87,7 +88,16 @@ export async function POST(request: NextRequest) {
       tags,
     });
 
-    return NextResponse.json(bookmark, { status: 201 });
+    return NextResponse.json({
+      id: bookmark.id,
+      url: bookmark.url,
+      title: bookmark.title,
+      description: bookmark.description,
+      favicon: bookmark.favicon,
+      tags: bookmark.tags,
+      createdAt: bookmark.createdAt.toISOString(),
+      updatedAt: bookmark.updatedAt.toISOString(),
+    }, { status: 201 });
   } catch (error) {
     console.error("Error creating bookmark:", error);
     return NextResponse.json({ error: "Failed to create bookmark" }, { status: 500 });
