@@ -149,6 +149,129 @@ The API supports anonymous usage with a device token that expires after 90 days 
 | PATCH | `/api/v1/extension/tracking/visit/[id]` | Update visit duration |
 | GET | `/api/v1/extension/tracking/visits` | List page visits |
 
+## Testing
+
+The project includes a comprehensive test suite with unit tests (mocked dependencies) and integration tests (real PostgreSQL database).
+
+### Running Tests
+
+```bash
+# Run all unit tests in watch mode
+npm run test
+
+# Run all unit tests once
+npm run test:run
+
+# Run tests with coverage report
+npm run test:coverage
+
+# Run integration tests (requires Docker)
+npm run test:integration
+```
+
+### Test Structure
+
+```
+src/__tests__/
+├── setup.ts                    # Global test setup
+├── helpers/
+│   ├── request.ts              # Mock NextRequest factory
+│   └── factories.ts            # Test data generators (User, Device, Bookmark, PageVisit)
+├── mocks/
+│   ├── prisma.ts               # Prisma client mock
+│   └── auth.ts                 # NextAuth mock helpers
+├── unit/                       # Unit tests (mocked Prisma)
+│   ├── bookmarks.test.ts       # Session-authenticated bookmarks
+│   ├── tracking.test.ts        # Session-authenticated visits
+│   ├── cron/
+│   │   └── cleanup.test.ts     # Cron job tests
+│   └── extension/
+│       ├── device.test.ts      # Device creation
+│       ├── device-status.test.ts
+│       ├── device-link.test.ts
+│       ├── me.test.ts
+│       ├── bookmarks.test.ts
+│       ├── bookmarks-id.test.ts
+│       └── tracking.test.ts
+└── integration/                # Integration tests (real PostgreSQL)
+    ├── setup-db.ts             # Database setup/teardown
+    ├── helpers.ts              # Test database helpers
+    ├── device-lifecycle.test.ts
+    ├── bookmark-sync.test.ts
+    └── tracking-flow.test.ts
+```
+
+### Integration Tests Setup
+
+Integration tests run against a local PostgreSQL database via Docker:
+
+```bash
+# Start the test database
+npm run db:test:up
+
+# Run integration tests
+npm run test:integration
+
+# Stop the test database
+npm run db:test:down
+
+# Reset test database (apply migrations fresh)
+npm run db:test:reset
+```
+
+### Writing Tests
+
+**Unit tests** mock external dependencies (Prisma, auth) and test API route handlers in isolation:
+
+```typescript
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { createDeviceRequest, parseResponse } from '../../helpers/request';
+import { createUser, createExtensionAuthContext } from '../../helpers/factories';
+
+vi.mock('@/lib/extension-auth', () => ({
+  validateExtensionAuth: vi.fn(),
+}));
+
+import { validateExtensionAuth } from '@/lib/extension-auth';
+import { GET } from '@/app/api/v1/extension/me/route';
+
+describe('GET /api/v1/extension/me', () => {
+  it('should return user profile', async () => {
+    const user = createUser();
+    vi.mocked(validateExtensionAuth).mockResolvedValue(
+      createExtensionAuthContext('authenticated', { user })
+    );
+
+    const request = createDeviceRequest('/api/v1/extension/me', 'token');
+    const response = await GET(request);
+    
+    expect(response.status).toBe(200);
+  });
+});
+```
+
+**Integration tests** use a real database to test complete workflows:
+
+```typescript
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { PrismaClient } from '@prisma/client';
+import { createTestPrisma, createTestUser, createTestDevice } from './helpers';
+
+describe('Device Lifecycle', () => {
+  let prisma: PrismaClient;
+
+  beforeEach(() => { prisma = createTestPrisma(); });
+  afterEach(async () => { await prisma.$disconnect(); });
+
+  it('should link device to user and merge data', async () => {
+    const user = await createTestUser(prisma);
+    const device = await createTestDevice(prisma);
+    
+    // Test the complete linking workflow...
+  });
+});
+```
+
 ## Deployment
 
 1. Push to GitHub

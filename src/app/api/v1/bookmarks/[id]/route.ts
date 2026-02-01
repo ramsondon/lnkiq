@@ -43,7 +43,16 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: "Bookmark not found" }, { status: 404 });
     }
 
-    return NextResponse.json(bookmark);
+    return NextResponse.json({
+      id: bookmark.id,
+      url: bookmark.url,
+      title: bookmark.title,
+      description: bookmark.description,
+      favicon: bookmark.favicon,
+      tags: bookmark.tags,
+      createdAt: bookmark.createdAt.toISOString(),
+      updatedAt: bookmark.updatedAt.toISOString(),
+    });
   } catch (error) {
     console.error("Error updating bookmark:", error);
     return NextResponse.json({ error: "Failed to update bookmark" }, { status: 500 });

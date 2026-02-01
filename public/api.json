@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "lnkiq API",
-    "description": "API for the lnkiq browser extension and web application. Provides bookmark management, activity tracking, and device authentication.\n\n## Authentication\n\nThe API supports two authentication methods:\n\n1. **Device Token** - Used by the browser extension. Pass via `X-Device-Token` header.\n2. **Session Cookie** - Used by the web application. Managed automatically by NextAuth.js.\n\n## Rate Limits\n\n| Endpoint | Limit |\n|----------|-------|\n| `POST /extension/device` | 10 per hour per IP |\n| `POST /extension/bookmarks` | 100 per hour |\n| `GET /extension/bookmarks` | 300 per hour |\n| `POST /extension/tracking/visit` | 1000 per hour |\n| `PATCH /extension/tracking/visit/{id}` | 2000 per hour |\n\n## Pagination\n\nList endpoints support offset-based pagination using `limit` and `offset` parameters. The response includes `total` for calculating page count and `hasMore` to indicate if more results exist.\n\n## Error Handling\n\nAll errors return a JSON object with an `error` field containing a human-readable message.",
+    "description": "Comprehensive REST API for the lnkiq browser extension and web application. This API enables intelligent bookmark management, browsing activity tracking, cross-device synchronization, and seamless device-to-account linking.\n\n## Core Features\n\n- **Bookmark Management**: Create, read, update, and delete bookmarks with support for tags, descriptions, and favicons\n- **Activity Tracking**: Monitor page visits with duration tracking for productivity insights and browsing analytics\n- **Device Authentication**: Anonymous device tokens allow instant usage without signup, with optional account linking later\n- **Cross-Platform Sync**: Seamlessly sync bookmarks and history between browser extension and web dashboard\n\n## Communication Flow\n\nThe lnkiq API supports a progressive authentication model that allows users to start using the extension immediately without signup, then optionally link to an account later.\n\n### Phase 1: Anonymous Device Setup (First Install)\n\n```\n┌─────────────────┐     POST /extension/device      ┌─────────────┐\n│ Browser         │ ──────────────────────────────▶ │ lnkiq API   │\n│ Extension       │                                  │             │\n│                 │ ◀────────────────────────────── │             │\n│                 │   { deviceToken, expiresAt }     │             │\n└─────────────────┘                                  └─────────────┘\n```\n\n1. Extension calls `POST /extension/device` on first install\n2. API generates a unique device token (valid 90 days)\n3. Extension stores token in `chrome.storage.local`\n4. All subsequent requests include `X-Device-Token` header\n\n### Phase 2: Anonymous Usage (Pre-Account)\n\nWhile using the extension anonymously, all data is associated with the device:\n\n```\n┌─────────────────┐   X-Device-Token: dev_xxx       ┌─────────────┐\n│ Extension       │ ──────────────────────────────▶ │ lnkiq API   │\n│                 │   POST /extension/bookmarks     │             │\n│                 │   POST /extension/tracking/visit│             │\n│                 │                                  │             │\n│                 │ ◀────────────────────────────── │             │\n│                 │   { bookmark/visit data }       │             │\n└─────────────────┘                                  └─────────────┘\n```\n\n- Bookmarks saved → stored with `deviceId` reference\n- Page visits logged → stored with `deviceId` reference\n- Token expiry extended on each valid request (rolling 90-day window)\n- User can continue indefinitely without creating an account\n\n### Phase 3: User Account Creation (Web App)\n\nUser creates account via the web application using OAuth:\n\n```\n┌─────────────────┐    OAuth Flow (GitHub/Google)   ┌─────────────┐\n│ Web Browser     │ ──────────────────────────────▶ │ lnkiq.net   │\n│                 │                                  │             │\n│                 │ ◀────────────────────────────── │             │\n│                 │   Session Cookie Set            │             │\n└─────────────────┘                                  └─────────────┘\n```\n\n1. User visits lnkiq.net and clicks \"Sign in with GitHub\"\n2. OAuth flow completes, NextAuth.js creates session\n3. `authjs.session-token` cookie is set automatically\n4. User account is created in database\n\n### Phase 4: Device Linking (Connecting Extension to Account)\n\nThe extension links to the user's account, merging all anonymous data:\n\n```\n┌─────────────────┐                                  ┌─────────────┐\n│ Extension       │   POST /extension/device/link   │ lnkiq API   │\n│                 │   X-Device-Token: dev_xxx       │             │\n│                 │   Cookie: authjs.session-token  │             │\n│                 │ ──────────────────────────────▶ │             │\n│                 │                                  │ ┌─────────┐ │\n│                 │                                  │ │ Merge   │ │\n│                 │                                  │ │ Process │ │\n│                 │ ◀────────────────────────────── │ └─────────┘ │\n│                 │   { bookmarksMerged: 15,        │             │\n│                 │     visitsMerged: 142 }         │             │\n└─────────────────┘                                  └─────────────┘\n```\n\n**Requirements for linking:**\n- User must be logged in on lnkiq.net (session cookie)\n- Extension must send its device token in header\n- Both authentications must be valid\n\n**What happens during merge:**\n\n| Data Type | Merge Strategy |\n|-----------|----------------|\n| Bookmarks (no URL conflict) | Transferred to user account |\n| Bookmarks (URL conflict) | Keep older `createdAt`, merge tags, prefer existing description |\n| Page Visits (no conflict) | Transferred to user account |\n| Page Visits (same URL+time) | Keep older record, sum `durationSeconds` |\n\n### Phase 5: Authenticated Usage (Post-Link)\n\nAfter linking, the device token continues to work but provides access to user data:\n\n```\n┌─────────────────┐   X-Device-Token: dev_xxx       ┌─────────────┐\n│ Extension       │ ──────────────────────────────▶ │ lnkiq API   │\n│                 │   GET /extension/bookmarks      │             │\n│                 │                                  │             │\n│                 │ ◀────────────────────────────── │             │\n│                 │   { all user bookmarks }        │             │\n└─────────────────┘                                  └─────────────┘\n```\n\n- Same device token, but now linked to user\n- All API calls return/modify user's data (not device-scoped)\n- Data syncs across all linked devices and web app\n- Token expiry continues to extend on activity\n\n### Phase 6: Multi-Device Sync\n\nUser can link multiple devices to the same account:\n\n```\n┌─────────────────┐                                  ┌─────────────┐\n│ Device A        │   Linked to User #123           │             │\n│ (dev_aaa)       │ ───────────────────────────────▶│             │\n├─────────────────┤                                  │ lnkiq API   │\n│ Device B        │   Linked to User #123           │  ┌───────┐  │\n│ (dev_bbb)       │ ───────────────────────────────▶│  │User DB│  │\n├─────────────────┤                                  │  └───────┘  │\n│ Web Dashboard   │   Session Cookie (User #123)    │             │\n│                 │ ───────────────────────────────▶│             │\n└─────────────────┘                                  └─────────────┘\n```\n\n- Each device has its own token, all linked to same user\n- Bookmarks/visits from any source go to user's unified collection\n- Changes sync immediately across all access points\n\n### Token Lifecycle & Renewal\n\n```\nDay 0:  Device created ────────────────────────────▶ Expires Day 90\n        │\nDay 15: API request ───────────────────────────────▶ Expires Day 105\n        │\nDay 45: API request ───────────────────────────────▶ Expires Day 135\n        │\n        ▼\n        (Token expiry extends on EVERY valid request)\n```\n\n**Important behaviors:**\n- Token expiry is a rolling window (extends on each valid API call)\n- Linked devices never truly expire (data belongs to user)\n- Unlinked devices + data are cleaned up 90 days after last activity\n- Use `GET /extension/device/status` to check `daysRemaining`\n\n### Device Status Check Flow\n\nExtension should check status on startup to determine UI state:\n\n```javascript\n// Extension startup logic\nconst status = await fetch('/extension/device/status', {\n  headers: { 'X-Device-Token': storedToken }\n});\n\nif (status.isLinked && status.isAuthenticated) {\n  // Show logged-in UI with user profile\n  showUserProfile(status.user);\n} else if (status.daysRemaining < 14) {\n  // Show warning: \"Link account to keep your data\"\n  showLinkPrompt();\n} else {\n  // Show anonymous UI\n  showAnonymousUI();\n}\n```\n\n## Authentication\n\nThe API supports two authentication methods:\n\n1. **Device Token** (`X-Device-Token` header) - Used by the browser extension for anonymous or authenticated access. Tokens are generated on first install and remain valid for 90 days. Anonymous devices can be linked to user accounts at any time, which merges all anonymous data into the user's account.\n\n2. **Session Cookie** (`authjs.session-token`) - Used by the web application for authenticated users. Managed automatically by NextAuth.js when a user logs in via OAuth or credentials.\n\n## Rate Limits\n\nTo ensure fair usage and protect the service, the following rate limits apply:\n\n| Endpoint | Limit | Window | Purpose |\n|----------|-------|--------|----------|\n| `POST /extension/device` | 10 | per hour per IP | Prevents abuse of device creation |\n| `POST /extension/bookmarks` | 100 | per hour per device | Allows normal bookmarking activity |\n| `GET /extension/bookmarks` | 300 | per hour per device | Supports frequent sync operations |\n| `POST /extension/tracking/visit` | 1000 | per hour per device | Accommodates active browsing |\n| `PATCH /extension/tracking/visit/{id}` | 2000 | per hour per device | Allows frequent duration updates |\n\nExceeding rate limits returns HTTP 429 with a `Retry-After` header.\n\n## Pagination\n\nList endpoints support offset-based pagination using `limit` and `offset` parameters:\n\n- `limit`: Maximum number of items to return (varies by endpoint, typically 1-100 or 1-500)\n- `offset`: Number of items to skip from the start\n\nThe response includes:\n- `total`: Total count of items matching the filter (use for calculating page count)\n- `hasMore`: Boolean indicating if more results exist beyond the current page\n\n## Error Handling\n\nAll errors return a JSON object with an `error` field containing a human-readable message. HTTP status codes follow REST conventions:\n\n- `400` - Bad Request (invalid input, missing required fields)\n- `401` - Unauthorized (missing or invalid authentication)\n- `403` - Forbidden (insufficient permissions)\n- `404` - Not Found (resource doesn't exist)\n- `409` - Conflict (e.g., device already linked to another user)\n- `410` - Gone (e.g., expired device token)\n- `429` - Too Many Requests (rate limit exceeded)\n- `500` - Internal Server Error",
     "version": "1.0.0",
     "contact": {
       "email": "hello@lnkiq.net",
@@ -33,27 +33,27 @@
   "tags": [
     {
       "name": "Device",
-      "description": "Anonymous device management for browser extension. Devices are valid for 90 days and can be linked to user accounts."
+      "description": "Anonymous device management for the browser extension. When users first install the lnkiq extension, a unique device token is automatically generated and stored locally. This token allows immediate usage without requiring signup or login. Devices are valid for 90 days from creation and can be optionally linked to user accounts at any time. When linked, all anonymous bookmarks and browsing history are automatically merged into the user's account, enabling seamless cross-device synchronization."
     },
     {
       "name": "User",
-      "description": "User profile endpoints for authenticated users."
+      "description": "User profile endpoints for authenticated users. These endpoints allow the browser extension to retrieve the linked user's profile information, including display name, email, and avatar. Only accessible when the device has been linked to a user account via the `/extension/device/link` endpoint."
     },
     {
       "name": "Bookmarks",
-      "description": "Bookmark management for web application (session authenticated)."
+      "description": "Bookmark management endpoints for the web application, authenticated via session cookies. Supports full CRUD operations (Create, Read, Update, Delete) with rich features including full-text search across title, description, and URL, tag-based filtering with OR logic, and offset-based pagination. Use these endpoints to build bookmark management dashboards and search interfaces."
     },
     {
       "name": "Extension Bookmarks",
-      "description": "Bookmark management for browser extension (device token authenticated)."
+      "description": "Bookmark management endpoints specifically designed for the browser extension, authenticated via device tokens. These endpoints support both anonymous devices (pre-account creation) and linked devices (authenticated users). Bookmarks created by anonymous devices are automatically transferred to the user's account when the device is linked. Optimized for quick one-click bookmark saving from any webpage."
     },
     {
       "name": "Tracking",
-      "description": "Page visit tracking for activity monitoring and analytics."
+      "description": "Page visit tracking endpoints for activity monitoring, productivity analysis, and browsing analytics. The extension automatically logs page visits when users navigate to new pages, capturing URL, title, timestamp, and favicon. Duration tracking is handled separately - call the update endpoint when the user leaves the page or the tab becomes inactive. This two-phase approach ensures accurate time tracking even if the browser closes unexpectedly. Use `keepalive: true` with fetch for reliable delivery on page unload."
     },
     {
       "name": "Cron",
-      "description": "Scheduled maintenance tasks. These endpoints are called by automated cron jobs."
+      "description": "Scheduled maintenance task endpoints called by automated cron jobs. These endpoints handle system cleanup operations such as removing expired anonymous devices and their associated data. Protected by a CRON_SECRET bearer token to prevent unauthorized access. Not intended for direct client usage."
     }
   ],
   "paths": {
@@ -61,7 +61,7 @@
       "post": {
         "tags": ["Device"],
         "summary": "Create anonymous device",
-        "description": "Creates a new anonymous device token. Called on first extension install. The token is valid for 90 days and should be stored securely in the extension's local storage.",
+        "description": "Creates a new anonymous device and returns a unique device token. This endpoint should be called once during the browser extension's first initialization (e.g., on first install or if no stored token exists).\n\n**Token Lifecycle:**\n1. The device token is valid for 90 days from creation\n2. Store the token securely in browser extension's local storage (`chrome.storage.local` or equivalent)\n3. Include the token in the `X-Device-Token` header for all subsequent API calls\n4. The token can be linked to a user account at any time via `POST /extension/device/link`\n5. If linked, the token remains valid but data is associated with the user account\n\n**Implementation Notes:**\n- Rate limited to 10 requests per hour per IP address to prevent abuse\n- On token expiration, create a new device and optionally link it to the same account\n- The `expiresAt` field should be used to show renewal prompts to users before expiration",
         "operationId": "createDevice",
         "responses": {
           "201": {
@@ -106,7 +106,8 @@
       },
       "options": {
         "tags": ["Device"],
-        "summary": "CORS preflight",
+        "summary": "CORS preflight for device creation",
+        "description": "Handles CORS preflight requests for the device creation endpoint. The browser automatically sends this OPTIONS request before making cross-origin POST requests from the browser extension. Returns appropriate CORS headers (`Access-Control-Allow-Origin`, `Access-Control-Allow-Methods`, `Access-Control-Allow-Headers`) to permit the subsequent request.",
         "operationId": "devicePreflight",
         "responses": {
           "204": {
@@ -119,7 +120,7 @@
       "get": {
         "tags": ["Device"],
         "summary": "Get device status",
-        "description": "Retrieves the current device status including authentication state, expiry information, and linked user details if applicable.",
+        "description": "Retrieves comprehensive status information for the current device, including authentication state, token expiry details, and linked user information if applicable.\n\n**Use Cases:**\n1. **Extension Initialization**: Check device validity and user state on extension startup\n2. **Token Renewal Prompts**: Use `daysRemaining` to show renewal warnings (e.g., \"Your session expires in X days\")\n3. **UI State Management**: Determine whether to show logged-in or anonymous UI based on `isLinked` and `isAuthenticated` flags\n4. **User Profile Display**: If linked, use the `user` object to display the user's name, email, or avatar in the extension popup\n\n**Response Fields:**\n- `isLinked`: True if device is associated with a user account (data syncs across devices)\n- `isAuthenticated`: True if the user's session is currently valid (always true if isLinked is true)\n- `daysRemaining`: Countdown to token expiration (0-90), useful for proactive renewal prompts\n- `lastActiveAt`: Timestamp of last API activity, useful for debugging and analytics",
         "operationId": "getDeviceStatus",
         "security": [
           {
@@ -184,7 +185,8 @@
       },
       "options": {
         "tags": ["Device"],
-        "summary": "CORS preflight",
+        "summary": "CORS preflight for device status",
+        "description": "Handles CORS preflight requests for the device status endpoint. Returns appropriate CORS headers to permit cross-origin GET requests with the `X-Device-Token` header.",
         "operationId": "deviceStatusPreflight",
         "responses": {
           "204": {
@@ -197,7 +199,7 @@
       "post": {
         "tags": ["Device"],
         "summary": "Link device to user account",
-        "description": "Links an anonymous device to an authenticated user account. Requires both session auth (user must be logged in on website) and X-Device-Token header. All anonymous bookmarks and visit history are merged into the user's account.",
+        "description": "Links an anonymous browser extension device to an authenticated user account. This is the key endpoint that enables the anonymous-first user experience - users can save bookmarks and track activity immediately after installing the extension, then link their device to a user account later to enable cross-device sync and data persistence.\n\n**Requirements:**\n- User must be logged in on the lnkiq website (session cookie required)\n- The `X-Device-Token` header must contain the anonymous device token from the extension\n- Both authentication methods must be present for this endpoint to work\n\n**What Happens on Link:**\n1. All bookmarks created with the anonymous device are transferred to the user's account\n2. All page visit history from the device is associated with the user\n3. The device token remains valid and continues to work for API calls\n4. Future data from this device will be automatically associated with the user\n5. The response includes counts of merged bookmarks and visits for user feedback\n\n**Error Scenarios:**\n- `400`: Missing `X-Device-Token` header\n- `401`: User not logged in (session expired or missing)\n- `404`: Device token is invalid or doesn't exist in database\n- `409`: Device is already linked to a DIFFERENT user account (security measure)\n- `410`: Device token has expired (user needs to create a new device)",
         "operationId": "linkDevice",
         "security": [
           {
@@ -291,7 +293,8 @@
       },
       "options": {
         "tags": ["Device"],
-        "summary": "CORS preflight",
+        "summary": "CORS preflight for device linking",
+        "description": "Handles CORS preflight requests for the device link endpoint. Returns appropriate CORS headers to permit cross-origin POST requests with both session cookies and the `X-Device-Token` header. The preflight is especially important for this endpoint as it requires both authentication methods.",
         "operationId": "deviceLinkPreflight",
         "responses": {
           "204": {
@@ -304,7 +307,7 @@
       "get": {
         "tags": ["User"],
         "summary": "Get user profile",
-        "description": "Retrieves the authenticated user's profile information. The device must be linked to an account (returns 403 if anonymous).",
+        "description": "Retrieves the authenticated user's profile information for display in the browser extension. This endpoint is used to personalize the extension UI by showing the user's name, email, and avatar.\n\n**When to Use:**\n- After confirming the device is linked (via `/extension/device/status` where `isLinked: true`)\n- To populate the user profile section in the extension popup\n- To verify the user's identity before performing sensitive operations\n\n**Access Requirements:**\n- The device must be linked to a user account (call `/extension/device/link` first)\n- Returns `403 Forbidden` for anonymous devices that haven't been linked yet\n\n**Response Fields:**\n- `id`: The user's unique identifier in the lnkiq system\n- `name`: Display name (may be null if not set in account settings)\n- `email`: Primary email address (may be null depending on OAuth provider)\n- `image`: URL to the user's avatar image (typically from OAuth provider like Google/GitHub)",
         "operationId": "getMe",
         "security": [
           {
@@ -355,7 +358,8 @@
       },
       "options": {
         "tags": ["User"],
-        "summary": "CORS preflight",
+        "summary": "CORS preflight for user profile",
+        "description": "Handles CORS preflight requests for the user profile endpoint. Returns appropriate CORS headers to permit cross-origin GET requests from the browser extension with the `X-Device-Token` header.",
         "operationId": "mePreflight",
         "responses": {
           "204": {
@@ -368,7 +372,7 @@
       "get": {
         "tags": ["Bookmarks"],
         "summary": "List bookmarks",
-        "description": "List bookmarks for authenticated user with optional search, tag filtering, and pagination.",
+        "description": "Retrieves a paginated list of bookmarks for the authenticated user. Supports powerful filtering capabilities for building search interfaces, tag-based organization views, and bookmark management dashboards.\n\n**Search Behavior:**\n- The `search` parameter performs case-insensitive partial matching across title, description, and URL fields\n- Multiple words in the search term are treated as an AND query\n- Example: `search=react tutorial` matches bookmarks containing both \"react\" AND \"tutorial\"\n\n**Tag Filtering:**\n- The `tags` parameter accepts comma-separated tag names with OR logic\n- Example: `tags=javascript,react,frontend` returns bookmarks with ANY of these tags\n- Tags are case-sensitive; normalize tag names before querying\n\n**Pagination:**\n- Results are ordered by creation date (newest first)\n- Use `limit` and `offset` for page-based navigation\n- The `total` field indicates total matches for calculating page count\n- The `hasMore` boolean helps implement infinite scroll patterns\n\n**Performance Notes:**\n- For large bookmark collections, prefer smaller page sizes (20-50 items)\n- Consider debouncing search queries in the UI to reduce API calls",
         "operationId": "listBookmarks",
         "security": [
           {
@@ -461,7 +465,7 @@
       "post": {
         "tags": ["Bookmarks"],
         "summary": "Create bookmark",
-        "description": "Create a new bookmark for the authenticated user.",
+        "description": "Creates a new bookmark for the authenticated user's collection. Use this endpoint from the web dashboard to manually add bookmarks or import from external sources.\n\n**Required Fields:**\n- `url`: Must be a valid URL with a recognized protocol (http:// or https://)\n- `title`: Human-readable title for the bookmark (typically the page's `<title>` tag)\n\n**Optional Fields:**\n- `description`: User-provided notes or summary about the bookmarked page\n- `favicon`: URL to the site's favicon for visual identification (extracted from the page or favicon service)\n- `tags`: Array of labels for organization; can be used for filtering and grouping\n\n**Duplicate Handling:**\n- Currently allows duplicate URLs; consider implementing client-side deduplication\n- Future versions may add upsert functionality to update existing bookmarks\n\n**Validation:**\n- URL format is validated server-side using the URL constructor\n- Tags are sanitized to string arrays; non-string values are filtered out\n- Maximum field lengths are enforced by the database schema",
         "operationId": "createBookmark",
         "security": [
           {
@@ -536,7 +540,7 @@
       "patch": {
         "tags": ["Bookmarks"],
         "summary": "Update bookmark",
-        "description": "Update an existing bookmark. Only the fields provided will be updated (partial update).",
+        "description": "Updates an existing bookmark with partial data. Only the fields included in the request body will be modified; omitted fields remain unchanged. This enables efficient updates without needing to send the complete bookmark object.\n\n**Update Behavior:**\n- Sending `{ \"title\": \"New Title\" }` only updates the title, leaving URL, description, and tags unchanged\n- To clear an optional field like description, explicitly set it to `null` or an empty string\n- The `tags` field replaces the entire array (not a merge); send the complete desired tag list\n\n**Ownership Verification:**\n- Only the bookmark owner can update it\n- Returns `404 Not Found` for bookmarks that don't exist OR don't belong to the current user (security measure)\n\n**Use Cases:**\n- Editing bookmark title or description from the dashboard\n- Updating tags for better organization\n- Correcting a bookmark URL that has changed\n- Updating favicon after the site icon has changed",
         "operationId": "updateBookmark",
         "security": [
           {
@@ -615,7 +619,7 @@
       "delete": {
         "tags": ["Bookmarks"],
         "summary": "Delete bookmark",
-        "description": "Permanently delete a bookmark.",
+        "description": "Permanently removes a bookmark from the user's collection. This action is irreversible - there is no trash or soft-delete functionality.\n\n**Behavior:**\n- Returns success (`200 OK`) with a confirmation message if the bookmark was deleted\n- Returns `404 Not Found` if the bookmark doesn't exist or doesn't belong to the current user\n- The bookmark ID in the path must exactly match an existing bookmark owned by the authenticated user\n\n**Implementation Notes:**\n- Consider implementing a confirmation dialog in the UI before calling this endpoint\n- Related data (if any, such as visit associations) is automatically cleaned up via database cascades\n- For bulk delete operations, call this endpoint multiple times (no batch delete endpoint currently exists)",
         "operationId": "deleteBookmark",
         "security": [
           {
@@ -675,7 +679,7 @@
       "get": {
         "tags": ["Tracking"],
         "summary": "List page visits (web)",
-        "description": "List page visits for authenticated user with optional date range filtering and pagination. Returns visits in reverse chronological order. This endpoint is for the web application (session authenticated).",
+        "description": "Retrieves a paginated history of page visits for the authenticated user. Use this endpoint to build browsing history views, activity dashboards, and productivity analytics in the web application.\n\n**Filtering Options:**\n- `from` and `to` parameters define a date range (ISO 8601 format); useful for viewing activity within specific time periods\n- `url` parameter enables partial matching to find visits to specific domains or pages\n- Date filtering is inclusive on both ends\n\n**Response Data:**\n- Results are ordered by visit time (newest first) for chronological browsing\n- Each visit includes duration in seconds (if tracked); `null` means the user left before duration was updated\n- The `total` field counts all visits matching the filter, not just the returned page\n\n**Use Cases:**\n- Daily/weekly activity timeline views\n- \"Time spent on site\" reports grouped by domain\n- \"Recently visited\" quick access feature\n- Productivity tracking dashboards showing browsing patterns\n\n**Privacy Considerations:**\n- Visit data is only accessible to the owning user\n- Consider providing users with the ability to delete visit history from the UI",
         "operationId": "listWebVisits",
         "security": [
           {
@@ -786,7 +790,7 @@
       "get": {
         "tags": ["Extension Bookmarks"],
         "summary": "List bookmarks",
-        "description": "List all bookmarks for the authenticated user or anonymous device. Returns bookmarks in reverse chronological order.",
+        "description": "Retrieves all bookmarks associated with the authenticated device or user. Designed for the browser extension to sync and display the user's bookmark collection.\n\n**Authentication Modes:**\n1. **Anonymous Device**: Returns bookmarks created by this specific device (pre-account linking)\n2. **Linked Device**: Returns all bookmarks from the user's account (includes bookmarks from all linked devices and web app)\n\n**Response:**\n- Returns bookmarks ordered by creation date (newest first)\n- Includes the `count` field for quick total without additional calculation\n- All bookmark fields are included: id, url, title, description, tags, timestamps\n\n**Extension Integration:**\n- Call on extension popup open to refresh the bookmark list\n- Use for search-as-you-type functionality within the extension\n- Cache results locally and sync periodically to reduce API calls\n\n**Performance:**\n- No pagination in this endpoint (returns all bookmarks at once)\n- For users with large bookmark collections, consider implementing client-side pagination/virtualization",
         "operationId": "listExtensionBookmarks",
         "security": [
           {
@@ -833,7 +837,7 @@
       "post": {
         "tags": ["Extension Bookmarks"],
         "summary": "Create bookmark",
-        "description": "Create a new bookmark from the browser extension.",
+        "description": "Creates a new bookmark from the browser extension. This is the primary endpoint for the extension's \"save bookmark\" functionality, enabling one-click bookmarking from any webpage.\n\n**How It Works:**\n1. Extension captures current page URL and title from the active tab\n2. Optional: Extension extracts favicon URL and lets user add description/tags\n3. Extension sends data to this endpoint with device token in header\n4. Bookmark is stored and associated with device or user account\n\n**Anonymous vs Linked:**\n- **Anonymous Device**: Bookmark is associated with the device; will be merged to user on account linking\n- **Linked Device**: Bookmark is directly associated with the user account and immediately syncs everywhere\n\n**Best Practices:**\n- Extract the page title using `document.title` or meta tags\n- Normalize URLs by removing tracking parameters (utm_*, fbclid, etc.)\n- Get favicon from `link[rel=\"icon\"]` or use a favicon service fallback\n- Allow users to edit title and add tags before saving for better organization\n\n**Rate Limiting:**\n- 100 bookmarks per hour per device prevents accidental duplicate submissions",
         "operationId": "createExtensionBookmark",
         "security": [
           {
@@ -885,7 +889,8 @@
       },
       "options": {
         "tags": ["Extension Bookmarks"],
-        "summary": "CORS preflight",
+        "summary": "CORS preflight for extension bookmarks",
+        "description": "Handles CORS preflight requests for the extension bookmarks endpoint. Returns appropriate CORS headers to permit cross-origin GET and POST requests with the `X-Device-Token` header from the browser extension context.",
         "operationId": "extensionBookmarksPreflight",
         "responses": {
           "204": {
@@ -898,7 +903,7 @@
       "delete": {
         "tags": ["Extension Bookmarks"],
         "summary": "Delete bookmark",
-        "description": "Delete a bookmark by ID. You can only delete bookmarks you own.",
+        "description": "Permanently removes a bookmark by ID from the browser extension. Use this when users want to remove bookmarks from their collection via the extension interface.\n\n**Authorization:**\n- You can only delete bookmarks that belong to your device (anonymous) or your user account (linked)\n- Returns `403 Forbidden` if trying to delete another user's bookmark (security measure to prevent ID enumeration)\n- Returns `404 Not Found` if the bookmark ID doesn't exist\n\n**Sync Behavior:**\n- For linked devices, deletion syncs across all devices and the web app immediately\n- For anonymous devices, deletion only affects that specific device's bookmark list\n\n**Implementation:**\n- Add a confirmation step in the extension UI before calling this endpoint\n- Update the local bookmark cache after successful deletion\n- Handle errors gracefully (e.g., bookmark already deleted by another device)",
         "operationId": "deleteExtensionBookmark",
         "security": [
           {
@@ -962,7 +967,8 @@
       },
       "options": {
         "tags": ["Extension Bookmarks"],
-        "summary": "CORS preflight",
+        "summary": "CORS preflight for bookmark deletion",
+        "description": "Handles CORS preflight requests for bookmark deletion by ID. Returns appropriate CORS headers to permit cross-origin DELETE requests with the `X-Device-Token` header from the browser extension.",
         "operationId": "extensionBookmarkByIdPreflight",
         "responses": {
           "204": {
@@ -975,7 +981,7 @@
       "post": {
         "tags": ["Tracking"],
         "summary": "Log page visit",
-        "description": "Records a new page visit for activity tracking. Call this when the user navigates to a new page. Use the returned `visitId` to update the duration when the user leaves the page.",
+        "description": "Records a new page visit when the user navigates to a page. This is the first step in the two-phase visit tracking system. The extension should call this endpoint immediately when a page loads, then call the duration update endpoint when the user leaves.\n\n**Tracking Flow:**\n1. **On page load**: Call this endpoint with URL, title, and optional favicon\n2. **Store the `visitId`**: Save the returned ID for the duration update\n3. **On page exit**: Call `PATCH /extension/tracking/visit/{id}` with the accumulated duration\n\n**When to Call:**\n- Tab content changes (navigation, including SPA route changes)\n- New tab is opened with a URL\n- Page is refreshed (creates a new visit)\n\n**What NOT to Track:**\n- Browser internal pages (chrome://, about:, moz-extension://)\n- Empty tabs or new tab pages\n- Consider filtering sensitive URLs based on user preferences\n\n**Implementation Tips:**\n- Use `webNavigation.onCompleted` or `tabs.onUpdated` events in the extension\n- Debounce rapid navigations to avoid duplicate visits\n- Store visitId in tab-specific state for accurate duration tracking\n\n**Rate Limiting:**\n- 1000 visits per hour accommodates active browsing sessions without restriction",
         "operationId": "logVisit",
         "security": [
           {
@@ -1038,7 +1044,8 @@
       },
       "options": {
         "tags": ["Tracking"],
-        "summary": "CORS preflight",
+        "summary": "CORS preflight for visit logging",
+        "description": "Handles CORS preflight requests for the visit logging endpoint. Returns appropriate CORS headers to permit cross-origin POST requests with the `X-Device-Token` header from the browser extension.",
         "operationId": "trackingVisitPreflight",
         "responses": {
           "204": {
@@ -1051,7 +1058,7 @@
       "patch": {
         "tags": ["Tracking"],
         "summary": "Update visit duration",
-        "description": "Updates the duration of a visit. Call this when the user leaves the page, the tab becomes hidden, or periodically during long visits. Use `fetch` with `keepalive: true` for reliable delivery on page close.",
+        "description": "Updates the time spent on a page visit. This is the second step in the two-phase visit tracking system. Call this endpoint when the user leaves a page to record how long they spent there.\n\n**When to Call:**\n- User navigates away from the page (same tab, different URL)\n- Tab is closed\n- Tab becomes hidden (switched to another tab) - for accurate active time tracking\n- Browser window loses focus (optional, depending on tracking granularity)\n- Periodically during long sessions (e.g., every 5 minutes) to prevent data loss\n\n**Reliable Delivery on Page Close:**\n```javascript\nnavigator.sendBeacon('/api/v1/extension/tracking/visit/{id}', data);\n// Or with fetch:\nfetch(url, { method: 'PATCH', body: data, keepalive: true });\n```\nThe `keepalive: true` flag ensures the request completes even if the page is closing.\n\n**Duration Calculation:**\n- Track time using `performance.now()` or timestamps\n- Only count active time if possible (exclude time when tab is hidden)\n- Use the Page Visibility API to detect tab visibility changes\n- Round to nearest second (fractional seconds are accepted but stored as integers)\n\n**Idempotency:**\n- Multiple calls update the same visit record (not additive)\n- Send cumulative duration, not incremental time\n- Last value wins; no need to track previous submissions\n\n**Rate Limiting:**\n- 2000 updates per hour allows frequent heartbeat-style updates",
         "operationId": "updateVisitDuration",
         "security": [
           {
@@ -1146,7 +1153,8 @@
       },
       "options": {
         "tags": ["Tracking"],
-        "summary": "CORS preflight",
+        "summary": "CORS preflight for visit duration update",
+        "description": "Handles CORS preflight requests for the visit duration update endpoint. Returns appropriate CORS headers to permit cross-origin PATCH requests with the `X-Device-Token` header from the browser extension.",
         "operationId": "trackingVisitByIdPreflight",
         "responses": {
           "204": {
@@ -1159,7 +1167,7 @@
       "get": {
         "tags": ["Tracking"],
         "summary": "List page visits (extension)",
-        "description": "List page visits for the device/user with optional date range filtering and pagination. Returns visits in reverse chronological order.",
+        "description": "Retrieves paginated browsing history for the device or linked user account. Use this endpoint to display browsing activity within the browser extension, show recently visited pages, or build mini-dashboards.\n\n**Data Scope:**\n- **Anonymous Device**: Only visits recorded by this specific device\n- **Linked Device**: All visits from the user's account across all devices\n\n**Filtering:**\n- Use `from` and `to` parameters to filter by date range (ISO 8601 format)\n- Dates are inclusive on both ends\n- Without date filters, returns the most recent visits across all time\n\n**Response Structure:**\n- `visits`: Array of visit records with full details (id, url, title, favicon, visitedAt, durationSeconds)\n- `count`: Number of items in this response page\n- `total`: Total visits matching the filter (for pagination UI)\n- `limit` and `offset`: Echo of request parameters\n\n**Extension Use Cases:**\n- \"Recent history\" dropdown in extension popup\n- Quick search through recent visits\n- \"Where did I read that?\" lookup functionality\n- Daily activity summary widget\n\n**Performance:**\n- Maximum 500 results per request\n- Use smaller limits for popup UIs; larger for dedicated history views\n- Consider caching results briefly to reduce API calls on repeated popup opens",
         "operationId": "listExtensionVisits",
         "security": [
           {
@@ -1251,7 +1259,8 @@
       },
       "options": {
         "tags": ["Tracking"],
-        "summary": "CORS preflight",
+        "summary": "CORS preflight for visit history",
+        "description": "Handles CORS preflight requests for the extension visit history endpoint. Returns appropriate CORS headers to permit cross-origin GET requests with the `X-Device-Token` header from the browser extension.",
         "operationId": "trackingVisitsPreflight",
         "responses": {
           "204": {
@@ -1264,7 +1273,7 @@
       "get": {
         "tags": ["Cron"],
         "summary": "Cleanup expired devices",
-        "description": "Cleanup expired anonymous devices and their associated data (bookmarks, visits). This endpoint is called daily by a cron job at 3:00 AM UTC. Devices expire 90 days after creation if not linked to a user account.",
+        "description": "Automated maintenance endpoint that removes expired anonymous devices and all associated data. This endpoint is called daily by the platform's cron scheduler (e.g., Vercel Cron or similar) and is not intended for manual invocation.\n\n**Important:** This endpoint is located at `/api/cron/cleanup-expired-devices`, NOT under the `/api/v1` path like other endpoints. The path shown here is relative to `/api` not `/api/v1`.\n\n**What Gets Deleted:**\n1. Anonymous devices where `expiresAt` < current timestamp (90 days after creation)\n2. All bookmarks associated with those devices (orphan cleanup)\n3. All page visit records associated with those devices (orphan cleanup)\n\n**What Is Preserved:**\n- Linked devices (even if past expiry date, they're preserved because data belongs to a user)\n- User accounts and their data\n- Any device that has been renewed via recent activity\n\n**Security:**\n- Protected by CRON_SECRET bearer token (set via environment variable)\n- Returns `401 Unauthorized` for requests without valid authentication\n- Should not be exposed to client applications\n\n**Scheduling:**\n- Configured to run daily at 3:00 AM UTC (configurable via vercel.json or cron configuration)\n- Typical execution time: < 30 seconds depending on volume\n\n**Monitoring:**\n- Response includes `deletedDevices` count for monitoring and alerting\n- Log `timestamp` to track execution history\n- Set up alerts if `success: false` is returned",
         "operationId": "cleanupExpiredDevices",
         "security": [
           {
@@ -1307,111 +1316,118 @@
         "type": "apiKey",
         "in": "header",
         "name": "X-Device-Token",
-        "description": "Anonymous device token for browser extension authentication. Obtain via `POST /extension/device`. Valid for 90 days."
+        "description": "Anonymous device authentication token for browser extension API access. Obtained by calling `POST /extension/device` on first extension install. The token should be stored securely in the browser extension's local storage (e.g., `chrome.storage.local`) and included in the `X-Device-Token` header for all authenticated requests. Tokens are valid for 90 days from creation. When linked to a user account via `/extension/device/link`, the token continues to work and provides access to the user's full data. Example: `X-Device-Token: dev_a1b2c3d4e5f6g7h8i9j0...`"
       },
       "SessionCookie": {
         "type": "apiKey",
         "in": "cookie",
         "name": "authjs.session-token",
-        "description": "Session cookie for web authentication. Managed automatically by NextAuth.js when user logs in."
+        "description": "HTTP-only session cookie for web application authentication. This cookie is automatically set by NextAuth.js when a user successfully logs in via OAuth (Google, GitHub) or credentials-based authentication. The cookie is managed entirely by the browser and server - no manual handling is required. For API calls from the web application, simply ensure `credentials: 'include'` is set in fetch requests. The cookie is HTTP-only for security and cannot be accessed via JavaScript. Session duration and renewal are configured server-side via NextAuth.js settings."
       },
       "CronSecret": {
         "type": "http",
         "scheme": "bearer",
-        "description": "Bearer token for cron job authentication. Set via CRON_SECRET environment variable."
+        "description": "Bearer token authentication for automated cron job endpoints. The token value must match the `CRON_SECRET` environment variable configured on the server. Used to protect maintenance endpoints from unauthorized access. Cron jobs should include this as `Authorization: Bearer {CRON_SECRET}`. This is a server-to-server authentication mechanism - never expose the cron secret to client-side code."
       }
     },
     "schemas": {
       "ErrorResponse": {
         "type": "object",
+        "description": "Standard error response returned when an API request fails. All error responses follow this consistent format to simplify error handling in client applications. The HTTP status code indicates the error category (4xx for client errors, 5xx for server errors), while the `error` field provides human-readable details.",
         "required": ["error"],
         "properties": {
           "error": {
             "type": "string",
-            "description": "Human-readable error message",
+            "description": "Human-readable error message describing what went wrong. These messages are suitable for displaying to end users in most cases. Examples: 'Invalid or expired device token', 'URL is required', 'Rate limit exceeded. Try again later.'",
             "example": "Invalid or expired device token"
           }
         }
       },
       "MessageResponse": {
         "type": "object",
+        "description": "Simple success response for operations that don't return a complex data object. Used for confirmations like successful deletions or status changes where only a confirmation message is needed.",
         "required": ["message"],
         "properties": {
           "message": {
             "type": "string",
-            "description": "Success message",
+            "description": "Human-readable success message confirming the operation was completed. Suitable for displaying in UI notifications or toast messages.",
             "example": "Bookmark deleted"
           }
         }
       },
       "DeviceCreatedResponse": {
         "type": "object",
+        "description": "Response returned when a new anonymous device is successfully created. The browser extension should securely store the `deviceToken` for all future API requests and optionally display expiry information to users.",
         "required": ["deviceToken", "expiresAt", "createdAt"],
         "properties": {
           "deviceToken": {
             "type": "string",
-            "description": "The device token to store and use for future requests",
+            "description": "The unique device token to store securely and include in the `X-Device-Token` header for all subsequent API calls. This token identifies the device and serves as the authentication credential. Format: `dev_` prefix followed by a cryptographically secure random string.",
             "example": "dev_a1b2c3d4e5f6g7h8i9j0..."
           },
           "expiresAt": {
             "type": "string",
             "format": "date-time",
-            "description": "When the token expires (90 days from creation)"
+            "description": "ISO 8601 timestamp indicating when the token expires (90 days from creation). Use this to show expiry warnings to users and prompt them to link their device to an account before expiration."
           },
           "createdAt": {
             "type": "string",
             "format": "date-time",
-            "description": "When the device was created"
+            "description": "ISO 8601 timestamp indicating when the device was created. Useful for logging and debugging purposes."
           }
         }
       },
       "DeviceStatusResponse": {
         "type": "object",
+        "description": "Comprehensive device status information including authentication state, expiry details, and linked user profile. Use this to determine the current state of the extension and customize the UI accordingly (anonymous vs. logged-in experience).",
         "required": ["isLinked", "isAuthenticated"],
         "properties": {
           "deviceId": {
             "type": "string",
-            "description": "Device ID"
+            "description": "Unique identifier for the device record in the database. Different from the deviceToken - this is safe to expose in logs and analytics."
           },
           "expiresAt": {
             "type": "string",
             "format": "date-time",
-            "description": "When the device token expires"
+            "description": "ISO 8601 timestamp when the device token expires. After this time, the token will no longer be valid for API requests."
           },
           "daysRemaining": {
             "type": "integer",
-            "description": "Days until token expiration (useful for showing renewal prompts)",
+            "description": "Number of days until the token expires, calculated from the current time. Use this to display countdown warnings (e.g., 'Your session expires in 7 days - link your account to keep your data') or trigger renewal prompts when approaching expiration.",
             "minimum": 0,
             "maximum": 90
           },
           "lastActiveAt": {
             "type": "string",
             "format": "date-time",
-            "description": "Last activity timestamp"
+            "description": "ISO 8601 timestamp of the device's most recent API activity. Updated on each API call. Useful for activity tracking and debugging stale sessions."
           },
           "isLinked": {
             "type": "boolean",
-            "description": "Whether device is linked to a user account"
+            "description": "Whether this device is associated with a user account. When `true`, the device's data is synced with the user's account and accessible from all their devices. When `false`, data is isolated to this specific device."
           },
           "isAuthenticated": {
             "type": "boolean",
-            "description": "Whether user is authenticated (always true if isLinked is true)"
+            "description": "Whether the user's session is currently valid. Always `true` when `isLinked` is `true`. Use this to determine if the user needs to re-authenticate."
           },
           "user": {
             "type": "object",
             "nullable": true,
-            "description": "User details if device is linked",
+            "description": "User profile information when the device is linked to an account. Returns `null` for anonymous devices. Contains basic profile data for displaying user identity in the extension UI.",
             "properties": {
               "id": {
-                "type": "string"
+                "type": "string",
+                "description": "Unique identifier for the user in the lnkiq system."
               },
               "name": {
                 "type": "string",
-                "nullable": true
+                "nullable": true,
+                "description": "User's display name, typically from their OAuth provider (Google, GitHub, etc.). May be null if not provided."
               },
               "email": {
                 "type": "string",
-                "nullable": true
+                "nullable": true,
+                "description": "User's email address. May be null depending on OAuth provider settings or user privacy preferences."
               }
             }
           }
@@ -1419,420 +1435,438 @@
       },
       "DeviceLinkResponse": {
         "type": "object",
+        "description": "Response returned when a device is successfully linked to a user account. Includes counts of migrated data to provide feedback to the user about what was transferred.",
         "required": ["message", "deviceId", "bookmarksMerged", "visitsMerged"],
         "properties": {
           "message": {
             "type": "string",
-            "description": "Success message"
+            "description": "Human-readable success message confirming the device link operation. Display this to the user as confirmation. Examples: 'Device linked successfully', 'Device already linked to your account'."
           },
           "deviceId": {
             "type": "string",
-            "description": "Device ID"
+            "description": "The unique identifier of the device that was linked. Can be used for logging or analytics purposes."
           },
           "bookmarksMerged": {
             "type": "integer",
-            "description": "Number of anonymous bookmarks transferred to user account",
+            "description": "Count of bookmarks that were transferred from anonymous device storage to the user's account. Display this to users to show them their data was preserved. Returns 0 if device was already linked or had no bookmarks.",
             "minimum": 0
           },
           "visitsMerged": {
             "type": "integer",
-            "description": "Number of anonymous visit records transferred to user account",
+            "description": "Count of page visit records that were transferred from anonymous device storage to the user's account. Represents browsing history that was migrated. Returns 0 if device was already linked or had no visit history.",
             "minimum": 0
           }
         }
       },
       "UserProfile": {
         "type": "object",
+        "description": "User profile information for authenticated users. Contains basic identity information that can be displayed in the extension or web application UI.",
         "required": ["id"],
         "properties": {
           "id": {
             "type": "string",
-            "description": "User's unique ID"
+            "description": "Unique identifier for the user in the lnkiq system. This ID is stable and can be used for referencing the user across different features and API calls."
           },
           "name": {
             "type": "string",
             "nullable": true,
-            "description": "User's display name"
+            "description": "User's display name as provided by their OAuth provider or manually set in account settings. Use this for personalized greetings and UI labels. May be null if the user hasn't set a name."
           },
           "email": {
             "type": "string",
             "format": "email",
             "nullable": true,
-            "description": "User's email address"
+            "description": "User's primary email address. Used for notifications and account recovery. May be null if the OAuth provider didn't share email or user opted out."
           },
           "image": {
             "type": "string",
             "format": "uri",
             "nullable": true,
-            "description": "URL to user's avatar image"
+            "description": "URL to the user's profile avatar image, typically provided by their OAuth provider (Google profile photo, GitHub avatar, etc.). Use this to display a personalized user icon in the extension popup. May be null if no avatar is available."
           }
         }
       },
       "Bookmark": {
         "type": "object",
+        "description": "Complete bookmark record containing all stored information about a saved URL. Includes metadata like title, description, tags, and timestamps for comprehensive bookmark management.",
         "required": ["id", "url", "title", "tags", "createdAt", "updatedAt"],
         "properties": {
           "id": {
             "type": "string",
-            "description": "Unique bookmark ID",
+            "description": "Unique identifier for the bookmark. Use this ID for update and delete operations. Format: `bm_` prefix followed by a random alphanumeric string.",
             "example": "bm_abc123"
           },
           "url": {
             "type": "string",
             "format": "uri",
-            "description": "Bookmarked URL",
+            "description": "The full URL of the bookmarked webpage. This is the target location that opens when the user clicks the bookmark.",
             "example": "https://react.dev/learn"
           },
           "title": {
             "type": "string",
-            "description": "Page title",
+            "description": "Human-readable title for the bookmark. Typically extracted from the webpage's `<title>` tag when bookmarking, but can be edited by the user for better organization.",
             "example": "React Documentation"
           },
           "description": {
             "type": "string",
             "nullable": true,
-            "description": "Optional user-provided description",
+            "description": "Optional user-provided notes or summary about the bookmark. Useful for remembering why a page was saved or adding context. Searchable in the bookmark search feature.",
             "example": "Official React learning guide"
           },
           "favicon": {
             "type": "string",
             "format": "uri",
             "nullable": true,
-            "description": "URL to the page favicon"
+            "description": "URL to the website's favicon (small icon). Used for visual identification in bookmark lists. Typically extracted from the page's `link[rel='icon']` tag or favicon.ico."
           },
           "tags": {
             "type": "array",
             "items": {
               "type": "string"
             },
-            "description": "Array of tag labels for organization",
+            "description": "Array of user-defined labels for organizing bookmarks. Tags enable filtering and grouping in the UI. Example use: categorize by topic ('react', 'tutorial'), project ('work', 'personal'), or status ('to-read', 'reference').",
             "example": ["react", "javascript", "frontend"]
           },
           "createdAt": {
             "type": "string",
             "format": "date-time",
-            "description": "When the bookmark was created"
+            "description": "ISO 8601 timestamp when the bookmark was first created. This timestamp never changes after creation."
           },
           "updatedAt": {
             "type": "string",
             "format": "date-time",
-            "description": "When the bookmark was last updated"
+            "description": "ISO 8601 timestamp when the bookmark was last modified. Updates whenever any field is changed (title, description, tags, etc.)."
           }
         }
       },
       "CreateBookmarkRequest": {
         "type": "object",
+        "description": "Request payload for creating a new bookmark. Only `url` and `title` are required; other fields enhance organization and discoverability.",
         "required": ["url", "title"],
         "properties": {
           "url": {
             "type": "string",
             "format": "uri",
-            "description": "The URL to bookmark (must be a valid URL)",
+            "description": "The complete URL to bookmark. Must be a valid URL with http:// or https:// protocol. The server validates URL format and rejects malformed URLs. Consider stripping tracking parameters (utm_*, fbclid, etc.) before sending for cleaner bookmarks.",
             "example": "https://react.dev/learn"
           },
           "title": {
             "type": "string",
-            "description": "Page title",
+            "description": "Human-readable title for the bookmark. Typically use the page's `<title>` tag value. Cannot be empty - must contain at least one character. Consider allowing users to edit before saving for better personalization.",
             "minLength": 1,
             "example": "React Documentation"
           },
           "description": {
             "type": "string",
-            "description": "Optional description",
+            "description": "Optional notes or summary about the bookmark. Useful for adding context about why the page was saved or key takeaways. This field is searchable, so adding descriptive notes improves findability.",
             "example": "Official React learning guide"
           },
           "favicon": {
             "type": "string",
             "format": "uri",
-            "description": "URL to the page favicon"
+            "description": "URL to the page's favicon image. Extract from `document.querySelector('link[rel=\"icon\"]')?.href` or construct from `origin + '/favicon.ico'`. Falls back to null if not provided."
           },
           "tags": {
             "type": "array",
             "items": {
               "type": "string"
             },
-            "description": "Array of tag labels",
+            "description": "Array of string labels for categorizing the bookmark. Tags should be lowercase and short for consistency. Common patterns: topics ('javascript', 'design'), projects ('work', 'side-project'), or actions ('to-read', 'reference').",
             "example": ["react", "javascript"]
           }
         }
       },
       "UpdateBookmarkRequest": {
         "type": "object",
-        "description": "All fields are optional. Only provided fields will be updated.",
+        "description": "Request payload for updating an existing bookmark. All fields are optional - only include fields you want to change. Omitted fields retain their current values. This enables efficient partial updates without sending the complete bookmark object.",
         "properties": {
           "url": {
             "type": "string",
             "format": "uri",
-            "description": "Updated URL"
+            "description": "New URL for the bookmark. Include only if changing the bookmarked URL. Must be a valid URL format. Useful when a page has moved to a new location."
           },
           "title": {
             "type": "string",
-            "description": "Updated title"
+            "description": "New title for the bookmark. Include only if changing the display title. Useful for customizing how the bookmark appears in lists."
           },
           "description": {
             "type": "string",
-            "description": "Updated description"
+            "description": "New description or notes. Include only if updating the description. Set to empty string or null to clear an existing description."
           },
           "favicon": {
             "type": "string",
             "format": "uri",
-            "description": "Updated favicon URL"
+            "description": "New favicon URL. Include only if the site's favicon has changed or wasn't captured initially."
           },
           "tags": {
             "type": "array",
             "items": {
               "type": "string"
             },
-            "description": "Updated tags (replaces existing tags)"
+            "description": "Complete replacement array for tags. Unlike other fields, tags are replaced entirely (not merged). To add a tag, include all existing tags plus the new one. To remove a tag, include all tags except the one to remove."
           }
         }
       },
       "PaginatedBookmarkListResponse": {
         "type": "object",
+        "description": "Paginated response containing a list of bookmarks with metadata for building pagination UI. Use `total` to calculate page count, and `hasMore` for infinite scroll implementations.",
         "required": ["bookmarks", "total", "limit", "offset"],
         "properties": {
           "bookmarks": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/Bookmark"
-            }
+            },
+            "description": "Array of bookmark objects matching the request filters. Ordered by creation date (newest first). May be empty if no bookmarks match the criteria."
           },
           "total": {
             "type": "integer",
-            "description": "Total number of bookmarks matching the filter",
+            "description": "Total count of bookmarks matching the search/filter criteria across all pages. Use this to calculate the total number of pages: `Math.ceil(total / limit)`. This count ignores pagination and represents the full result set size.",
             "minimum": 0
           },
           "limit": {
             "type": "integer",
-            "description": "Limit used for this query"
+            "description": "The limit value used for this query. Echoed back for client convenience when building pagination controls."
           },
           "offset": {
             "type": "integer",
-            "description": "Offset used for this query"
+            "description": "The offset value used for this query. Echoed back for client convenience. Current page number can be calculated as `Math.floor(offset / limit) + 1`."
           },
           "hasMore": {
             "type": "boolean",
-            "description": "Whether there are more results beyond this page"
+            "description": "Convenience boolean indicating whether more results exist beyond this page. Equivalent to `offset + bookmarks.length < total`. Useful for infinite scroll implementations to know when to stop loading."
           }
         }
       },
       "ExtensionBookmarkListResponse": {
         "type": "object",
+        "description": "Response containing all bookmarks for the extension. Unlike the paginated web response, this returns all bookmarks at once for simpler extension implementation.",
         "required": ["bookmarks", "count"],
         "properties": {
           "bookmarks": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/Bookmark"
-            }
+            },
+            "description": "Complete array of all bookmarks for the device or user. Ordered by creation date (newest first). For users with many bookmarks, consider implementing client-side search and virtualized scrolling."
           },
           "count": {
             "type": "integer",
-            "description": "Number of bookmarks returned",
+            "description": "Total number of bookmarks returned in this response. Equivalent to `bookmarks.length`. Provided for convenience without needing to calculate array length.",
             "minimum": 0
           }
         }
       },
       "CreateVisitRequest": {
         "type": "object",
+        "description": "Request payload for logging a new page visit. Send this when the user navigates to a page to start tracking their visit duration.",
         "required": ["url"],
         "properties": {
           "url": {
             "type": "string",
             "format": "uri",
-            "description": "The visited URL (tracking parameters should be stripped)",
+            "description": "The complete URL of the visited page. Should be the canonical URL when possible. Consider stripping tracking parameters (utm_*, fbclid, gclid, etc.) for cleaner analytics and to group visits to the same page correctly.",
             "example": "https://example.com/article"
           },
           "title": {
             "type": "string",
-            "description": "Page title",
+            "description": "The page title, typically from `document.title`. Helps identify pages in visit history without needing to load the URL. May change between visits if the site updates the title.",
             "example": "Interesting Article"
           },
           "visitedAt": {
             "type": "string",
             "format": "date-time",
-            "description": "When the visit occurred. Defaults to server time if not provided.",
+            "description": "ISO 8601 timestamp of when the visit occurred. If omitted, the server uses the current time. Useful for offline-first implementations where visits are queued and sent later. Should be the actual navigation time, not the API call time.",
             "example": "2026-01-31T10:30:00.000Z"
           }
         }
       },
       "VisitResponse": {
         "type": "object",
+        "description": "Response returned after successfully logging a page visit. The `visitId` is critical - store it to update the visit duration when the user leaves the page.",
         "required": ["visitId", "url", "visitedAt"],
         "properties": {
           "visitId": {
             "type": "string",
-            "description": "Visit ID - use this to update duration later",
+            "description": "Unique identifier for this visit record. IMPORTANT: Store this ID to update the visit duration later. Associate this ID with the tab/page context so you can call the duration update endpoint when the user leaves the page.",
             "example": "visit_xyz789"
           },
           "url": {
             "type": "string",
             "format": "uri",
-            "description": "The visited URL"
+            "description": "The URL that was recorded for this visit. Echoed back for confirmation and client-side state management."
           },
           "title": {
             "type": "string",
             "nullable": true,
-            "description": "Page title"
+            "description": "The page title that was recorded. Echoed back from the request. Will be null if no title was provided."
           },
           "favicon": {
             "type": "string",
             "format": "uri",
             "nullable": true,
-            "description": "URL to the page favicon"
+            "description": "The favicon URL that was recorded for this visit. Will be null if no favicon was provided in the request."
           },
           "visitedAt": {
             "type": "string",
             "format": "date-time",
-            "description": "When the visit started"
+            "description": "The timestamp that was recorded for this visit. May differ slightly from the request if the server time was used as the default."
           }
         }
       },
       "UpdateVisitDurationRequest": {
         "type": "object",
+        "description": "Request payload for updating the time spent on a page. Send this when the user leaves a page to complete the visit tracking cycle.",
         "required": ["durationSeconds"],
         "properties": {
           "durationSeconds": {
             "type": "number",
             "minimum": 0,
-            "description": "Total time spent on page in seconds. Value is rounded to nearest integer.",
+            "description": "Total cumulative time the user spent on the page, in seconds. Send the complete duration, not incremental time (this value replaces any previous duration). Fractional values are accepted but will be rounded to the nearest integer for storage. Calculate using `Date.now() - startTime` or `performance.now()` differences.",
             "example": 127
           }
         }
       },
       "VisitDurationResponse": {
         "type": "object",
+        "description": "Confirmation response after updating a visit's duration. Echoes back the recorded values for verification.",
         "required": ["visitId", "url", "durationSeconds"],
         "properties": {
           "visitId": {
             "type": "string",
-            "description": "Visit ID"
+            "description": "The visit ID that was updated. Matches the ID from the URL path parameter."
           },
           "url": {
             "type": "string",
             "format": "uri",
-            "description": "The visited URL"
+            "description": "The URL of the visit that was updated. Useful for confirming the correct visit was modified."
           },
           "durationSeconds": {
             "type": "integer",
-            "description": "Total time spent on page in seconds",
+            "description": "The duration value that was recorded (after rounding). Confirms the server received and stored the correct value.",
             "minimum": 0
           }
         }
       },
       "Visit": {
         "type": "object",
+        "description": "Complete page visit record containing all information about a single browsing session on a page. Includes timing information for activity analysis and productivity tracking.",
         "required": ["id", "url", "visitedAt"],
         "properties": {
           "id": {
             "type": "string",
-            "description": "Visit ID"
+            "description": "Unique identifier for the visit record. Can be used to reference this specific visit in analytics or for future API operations."
           },
           "url": {
             "type": "string",
             "format": "uri",
-            "description": "The visited URL"
+            "description": "The complete URL of the page that was visited. Use this to display the visit destination or link back to the page."
           },
           "title": {
             "type": "string",
             "nullable": true,
-            "description": "Page title"
+            "description": "The page title at the time of the visit. May be null if the title wasn't captured. Useful for displaying human-readable visit history."
           },
           "favicon": {
             "type": "string",
             "format": "uri",
             "nullable": true,
-            "description": "URL to the page favicon"
+            "description": "URL to the website's favicon for visual identification in visit history lists. May be null if not captured during the original visit."
           },
           "visitedAt": {
             "type": "string",
             "format": "date-time",
-            "description": "When the visit occurred"
+            "description": "ISO 8601 timestamp of when the page visit started. Use this for chronological sorting and time-based analytics."
           },
           "durationSeconds": {
             "type": "integer",
             "nullable": true,
-            "description": "Time spent on page in seconds (null if not yet updated)",
+            "description": "Time spent on the page in seconds. Will be null if the duration update endpoint was never called for this visit (e.g., browser closed before sending the update). Use this for 'time spent' analytics and productivity tracking.",
             "minimum": 0
           }
         }
       },
       "VisitListResponse": {
         "type": "object",
+        "description": "Paginated response containing visit history for the extension. Includes both the current page of results and metadata for implementing pagination controls.",
         "required": ["visits", "count", "total", "limit", "offset"],
         "properties": {
           "visits": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/Visit"
-            }
+            },
+            "description": "Array of visit records for the current page. Ordered by visit time (newest first). May be empty if no visits match the filter criteria or if the user has no visit history."
           },
           "count": {
             "type": "integer",
-            "description": "Number of visits in this response",
+            "description": "Number of visits in this response page. Equivalent to `visits.length`. Provided for convenience without needing to calculate array length.",
             "minimum": 0
           },
           "total": {
             "type": "integer",
-            "description": "Total number of visits matching the filter (use for pagination)",
+            "description": "Total number of visits matching the filter criteria across all pages. Use this to calculate total page count: `Math.ceil(total / limit)`. Useful for showing 'Page X of Y' or total result count.",
             "minimum": 0
           },
           "limit": {
             "type": "integer",
-            "description": "Limit used for this query (capped at 500)"
+            "description": "The limit value used for this query (capped at 500). Echoed back for client convenience when building pagination controls."
           },
           "offset": {
             "type": "integer",
-            "description": "Offset used for this query"
+            "description": "The offset value used for this query. Echoed back for client convenience. Calculate current page as `Math.floor(offset / limit) + 1`."
           }
         }
       },
       "PaginatedVisitListResponse": {
         "type": "object",
+        "description": "Paginated response containing visit history for the web application. Includes pagination metadata and a convenience `hasMore` flag for infinite scroll implementations.",
         "required": ["visits", "total", "limit", "offset"],
         "properties": {
           "visits": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/Visit"
-            }
+            },
+            "description": "Array of visit records for the current page. Ordered by visit time (newest first). Use for displaying browsing history timeline or activity feeds."
           },
           "total": {
             "type": "integer",
-            "description": "Total number of visits matching the filter",
+            "description": "Total number of visits matching the filter criteria. Use for calculating page count and displaying result summaries like 'Showing 1-50 of 1,842 visits'.",
             "minimum": 0
           },
           "limit": {
             "type": "integer",
-            "description": "Limit used for this query (capped at 500)"
+            "description": "The limit value used for this query (maximum 500). Echoed back for pagination UI state management."
           },
           "offset": {
             "type": "integer",
-            "description": "Offset used for this query"
+            "description": "The offset value used for this query. Echoed back for pagination state. To get next page: `offset + limit`."
           },
           "hasMore": {
             "type": "boolean",
-            "description": "Whether there are more results beyond this page"
+            "description": "Convenience boolean indicating whether more results exist beyond this page. True when `offset + visits.length < total`. Perfect for infinite scroll: stop loading when `hasMore` is false."
           }
         }
       },
       "CleanupResponse": {
         "type": "object",
+        "description": "Response from the cron cleanup job indicating the results of the maintenance operation. Used for monitoring and alerting on the cleanup process.",
         "required": ["success", "deletedDevices", "timestamp"],
         "properties": {
           "success": {
             "type": "boolean",
-            "description": "Whether cleanup was successful"
+            "description": "Indicates whether the cleanup operation completed successfully. If false, check server logs for error details. Consider setting up alerts for `success: false` responses."
           },
           "deletedDevices": {
             "type": "integer",
-            "description": "Number of expired devices deleted",
+            "description": "Count of expired anonymous devices that were deleted in this cleanup run. Associated bookmarks and visits are also deleted (cascade). Useful for monitoring system health and understanding data retention patterns.",
             "minimum": 0
           },
           "timestamp": {
             "type": "string",
             "format": "date-time",
-            "description": "When the cleanup was performed"
+            "description": "ISO 8601 timestamp of when the cleanup was performed. Log this for audit trails and debugging. Expected to be approximately 03:00 UTC daily if using the default cron schedule."
           }
         }
       }

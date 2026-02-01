@@ -106,10 +106,54 @@ function validateOpenAPISpec(spec: unknown): { valid: boolean; errors: string[] 
 }
 
 /**
+ * Validate HTTP Basic Auth credentials
+ */
+function validateBasicAuth(request: NextRequest): boolean {
+  const authHeader = request.headers.get('authorization');
+
+  if (!authHeader || !authHeader.startsWith('Basic ')) {
+    return false;
+  }
+
+  const base64Credentials = authHeader.slice(6);
+  let credentials: string;
+
+  try {
+    credentials = atob(base64Credentials);
+  } catch {
+    return false;
+  }
+
+  const [username, password] = credentials.split(':');
+
+  const expectedUsername = process.env.OPENAPI_USERNAME;
+  const expectedPassword = process.env.OPENAPI_PASSWORD;
+
+  // If credentials are not configured, deny access
+  if (!expectedUsername || !expectedPassword) {
+    console.warn('[OpenAPI] OPENAPI_USERNAME or OPENAPI_PASSWORD not configured');
+    return false;
+  }
+
+  return username === expectedUsername && password === expectedPassword;
+}
+
+/**
  * GET /api/v1/openapi
  * Returns the OpenAPI specification for the lnkiq API
+ * Protected by HTTP Basic Auth
  */
 export async function GET(request: NextRequest) {
+  // Validate Basic Auth
+  if (!validateBasicAuth(request)) {
+    return new NextResponse('Unauthorized', {
+      status: 401,
+      headers: {
+        'WWW-Authenticate': 'Basic realm="OpenAPI Documentation"',
+      },
+    });
+  }
+
   try {
     // Read the static api.json file from the public directory
     const filePath = path.join(process.cwd(), 'public', 'api.json');
@@ -162,7 +206,7 @@ export async function OPTIONS() {
     headers: {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
       'Access-Control-Max-Age': '86400',
     },
   });
