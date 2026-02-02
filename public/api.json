@@ -303,6 +303,109 @@
         }
       }
     },
+    "/extension/device/unlink": {
+      "post": {
+        "tags": ["Device"],
+        "summary": "Unlink device from user account (Sign Out)",
+        "description": "Unlinks the device from its associated user account, effectively signing the user out of the browser extension. This is the reverse of the `/extension/device/link` operation.\n\n**What Happens on Unlink (Sign Out):**\n1. The device is disconnected from the user account\n2. The device token remains valid and continues to work\n3. The device now operates in anonymous mode again\n4. Future bookmarks and visits are stored with the device, not the user\n5. Previously synced data remains safely in the user's account\n6. The device can be re-linked to the same or a different account later\n\n**Use Cases:**\n- User wants to sign out from the extension\n- User wants to switch to a different account\n- User is on a shared computer and wants to disconnect their account\n- Troubleshooting sync issues by unlinking and re-linking\n\n**Important Notes:**\n- This does NOT delete the device token - the extension continues to work anonymously\n- This does NOT delete any user data - all synced bookmarks/visits remain in the user's account\n- To fully sign out AND clear local data, the extension should also clear its local storage after calling this endpoint\n\n**Re-linking After Unlink:**\nThe user can sign back in at any time by:\n1. Logging into lnkiq.net\n2. Calling `/extension/device/link` again\n3. Any new anonymous data will be merged into their account",
+        "operationId": "unlinkDevice",
+        "security": [
+          {
+            "DeviceToken": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Device unlinked successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceUnlinkResponse"
+                },
+                "examples": {
+                  "unlinked": {
+                    "summary": "Device was linked and is now unlinked",
+                    "value": {
+                      "message": "Device unlinked successfully. You are now signed out.",
+                      "deviceId": "dev_123abc",
+                      "wasLinked": true
+                    }
+                  },
+                  "notLinked": {
+                    "summary": "Device was already anonymous",
+                    "value": {
+                      "message": "Device is not linked to any account",
+                      "deviceId": "dev_123abc",
+                      "wasLinked": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "X-Device-Token header required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "X-Device-Token header required"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Device not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Device not found"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Device token expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Device token expired"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "options": {
+        "tags": ["Device"],
+        "summary": "CORS preflight for device unlinking",
+        "description": "Handles CORS preflight requests for the device unlink (sign out) endpoint. Returns appropriate CORS headers to permit cross-origin POST requests with the `X-Device-Token` header.",
+        "operationId": "deviceUnlinkPreflight",
+        "responses": {
+          "204": {
+            "description": "CORS preflight response"
+          }
+        }
+      }
+    },
     "/extension/me": {
       "get": {
         "tags": ["User"],
@@ -1455,6 +1558,27 @@
             "type": "integer",
             "description": "Count of page visit records that were transferred from anonymous device storage to the user's account. Represents browsing history that was migrated. Returns 0 if device was already linked or had no visit history.",
             "minimum": 0
+          }
+        }
+      },
+      "DeviceUnlinkResponse": {
+        "type": "object",
+        "description": "Response returned when a device is unlinked from a user account (sign out). Confirms the operation and indicates whether the device was previously linked.",
+        "required": ["message", "deviceId", "wasLinked"],
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Human-readable message describing the result. Either confirms successful unlink or indicates the device wasn't linked. Display this to the user as feedback.",
+            "example": "Device unlinked successfully. You are now signed out."
+          },
+          "deviceId": {
+            "type": "string",
+            "description": "The unique identifier of the device that was unlinked. Useful for logging and debugging purposes.",
+            "example": "dev_123abc"
+          },
+          "wasLinked": {
+            "type": "boolean",
+            "description": "Indicates whether the device was actually linked before this call. `true` means the device was linked and is now unlinked (actual sign out occurred). `false` means the device was already anonymous (no action needed)."
           }
         }
       },
