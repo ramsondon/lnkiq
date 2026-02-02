@@ -120,7 +120,7 @@ export function generateExportJson(bookmarks: BookmarkForExport[]): string {
     exportedAt: new Date().toISOString(),
     source: 'lnkiq.net',
     bookmarks: bookmarks.map(b => ({
-      id: b.id,
+      // id: b.id,  // do not export internal IDs for privacy
       url: b.url,
       title: b.title,
       description: b.description,
