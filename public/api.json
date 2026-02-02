@@ -548,6 +548,123 @@
         }
       }
     },
+    "/user/export": {
+      "get": {
+        "tags": ["User"],
+        "summary": "Export bookmarks",
+        "description": "Export all bookmarks for the authenticated user in either HTML (Netscape Bookmark File Format) or JSON format.\n\n**HTML Format:**\n- Standard Netscape Bookmark File Format compatible with all major browsers\n- Can be imported directly into Chrome, Firefox, Safari, Edge, and other browsers\n- Bookmarks are organized into folders based on their primary tag\n- Includes bookmark URL, title, description, and favicon\n\n**JSON Format:**\n- Complete data export with all metadata\n- Includes bookmark ID, URL, title, description, favicon, tags, createdAt, updatedAt\n- Suitable for data backup or migration to other systems\n\n**File Download:**\n- Response includes Content-Disposition header for automatic file download\n- Filename format: `lnkiq-bookmarks-YYYY-MM-DD.{html|json}`",
+        "operationId": "exportBookmarks",
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "format",
+            "in": "query",
+            "description": "Export format. 'html' for browser-compatible Netscape format, 'json' for complete data backup.",
+            "schema": {
+              "type": "string",
+              "enum": ["html", "json"],
+              "default": "html",
+              "example": "html"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Bookmarks exported successfully",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string",
+                  "description": "Netscape Bookmark File Format HTML"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "version": {
+                      "type": "string",
+                      "description": "Export format version"
+                    },
+                    "exportedAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "Timestamp of export"
+                    },
+                    "source": {
+                      "type": "string",
+                      "description": "Source application"
+                    },
+                    "bookmarks": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Bookmark"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid format parameter",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Invalid format. Use 'html' or 'json'."
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - user is not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Unauthorized"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No bookmarks to export",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "No bookmarks to export"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error during export",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Failed to export bookmarks"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/bookmarks": {
       "get": {
         "tags": ["Bookmarks"],

@@ -247,8 +247,19 @@ export const dictionaries = {
         dataPrivacy: {
           title: "Data & Privacy",
           exportData: "Export your data",
-          exportDescription: "Download all your bookmarks and activity data.",
+          exportDescription: "Download all your bookmarks.",
           exportButton: "Export",
+          modalTitle: "Export Your Bookmarks",
+          modalDescription: "Choose the format for your export. The HTML format is compatible with all major browsers (Chrome, Firefox, Safari, Edge).",
+          formatLabel: "Export Format",
+          formatHtml: "HTML (Browser compatible)",
+          formatHtmlDescription: "Standard Netscape bookmark format. Import directly into any browser.",
+          formatJson: "JSON (Data backup)",
+          formatJsonDescription: "Complete bookmark data with all metadata.",
+          exportNow: "Export Now",
+          cancelButton: "Cancel",
+          exporting: "Exporting...",
+          noBookmarks: "You don't have any bookmarks to export yet.",
         },
         dangerZone: {
           title: "Danger Zone",
@@ -676,8 +687,19 @@ export const dictionaries = {
         dataPrivacy: {
           title: "Daten & Datenschutz",
           exportData: "Daten exportieren",
-          exportDescription: "Lade alle deine Lesezeichen und Aktivitätsdaten herunter.",
+          exportDescription: "Lade alle deine Lesezeichen herunter.",
           exportButton: "Exportieren",
+          modalTitle: "Lesezeichen exportieren",
+          modalDescription: "Wähle das Format für deinen Export. Das HTML-Format ist mit allen gängigen Browsern kompatibel (Chrome, Firefox, Safari, Edge).",
+          formatLabel: "Export-Format",
+          formatHtml: "HTML (Browser-kompatibel)",
+          formatHtmlDescription: "Standard Netscape-Lesezeichenformat. Direkt in jeden Browser importierbar.",
+          formatJson: "JSON (Datensicherung)",
+          formatJsonDescription: "Vollständige Lesezeichendaten mit allen Metadaten.",
+          exportNow: "Jetzt exportieren",
+          cancelButton: "Abbrechen",
+          exporting: "Exportiere...",
+          noBookmarks: "Du hast noch keine Lesezeichen zum Exportieren.",
         },
         dangerZone: {
           title: "Gefahrenzone",
@@ -1080,6 +1102,17 @@ export interface Dictionary {
         readonly exportData: string;
         readonly exportDescription: string;
         readonly exportButton: string;
+        readonly modalTitle: string;
+        readonly modalDescription: string;
+        readonly formatLabel: string;
+        readonly formatHtml: string;
+        readonly formatHtmlDescription: string;
+        readonly formatJson: string;
+        readonly formatJsonDescription: string;
+        readonly exportNow: string;
+        readonly cancelButton: string;
+        readonly exporting: string;
+        readonly noBookmarks: string;
       };
       readonly dangerZone: {
         readonly title: string;
