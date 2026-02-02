@@ -6,6 +6,7 @@ import prisma from "@/lib/prisma";
 import Image from "next/image";
 import Link from "next/link";
 import {Navbar} from "@/components/Navbar";
+import {DataPrivacyClient} from "@/components/settings/DataPrivacyClient";
 
 export default async function SettingsPage({
   params,
@@ -114,21 +115,7 @@ export default async function SettingsPage({
         </section>
 
         {/* Data & Privacy Section */}
-        <section className="card rounded-2xl p-6 mb-6">
-          <h2 className="text-xl font-bold mb-6">{dict.auth.settings.dataPrivacy.title}</h2>
-
-          <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 rounded-xl bg-zinc-50 dark:bg-zinc-800/50">
-              <div>
-                <p className="font-medium">{dict.auth.settings.dataPrivacy.exportData}</p>
-                <p className="text-sm text-zinc-500">{dict.auth.settings.dataPrivacy.exportDescription}</p>
-              </div>
-              <button className="px-4 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-sm font-medium">
-                {dict.auth.settings.dataPrivacy.exportButton}
-              </button>
-            </div>
-          </div>
-        </section>
+        <DataPrivacyClient labels={dict.auth.settings.dataPrivacy} />
 
         {/* Danger Zone */}
         <DangerZoneClient labels={dict.auth.settings.dangerZone} locale={locale} />
