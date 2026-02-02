@@ -255,6 +255,14 @@ export const dictionaries = {
           deleteAccount: "Delete account",
           deleteDescription: "Permanently delete your account and all associated data.",
           deleteButton: "Delete Account",
+          modalTitle: "Delete Account",
+          modalDescription: "This action cannot be undone. All your bookmarks, activity data, and account information will be permanently deleted.",
+          confirmWord: "delete",
+          confirmInstruction: "Type \"delete\" to confirm:",
+          inputPlaceholder: "Type delete to confirm",
+          confirmButton: "Delete Now",
+          cancelButton: "Cancel",
+          deleting: "Deleting...",
         },
       },
     },
@@ -676,6 +684,14 @@ export const dictionaries = {
           deleteAccount: "Konto löschen",
           deleteDescription: "Lösche dein Konto und alle zugehörigen Daten dauerhaft.",
           deleteButton: "Konto löschen",
+          modalTitle: "Konto löschen",
+          modalDescription: "Diese Aktion kann nicht rückgängig gemacht werden. Alle deine Lesezeichen, Aktivitätsdaten und Kontoinformationen werden dauerhaft gelöscht.",
+          confirmWord: "löschen",
+          confirmInstruction: "Gib \"löschen\" ein zur Bestätigung:",
+          inputPlaceholder: "Gib löschen zur Bestätigung ein",
+          confirmButton: "Jetzt löschen",
+          cancelButton: "Abbrechen",
+          deleting: "Wird gelöscht...",
         },
       },
     },
@@ -1070,6 +1086,14 @@ export interface Dictionary {
         readonly deleteAccount: string;
         readonly deleteDescription: string;
         readonly deleteButton: string;
+        readonly modalTitle: string;
+        readonly modalDescription: string;
+        readonly confirmWord: string;
+        readonly confirmInstruction: string;
+        readonly inputPlaceholder: string;
+        readonly confirmButton: string;
+        readonly cancelButton: string;
+        readonly deleting: string;
       };
     };
   };

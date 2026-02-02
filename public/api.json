@@ -471,6 +471,83 @@
         }
       }
     },
+    "/user": {
+      "delete": {
+        "tags": ["User"],
+        "summary": "Delete user account",
+        "description": "Permanently deletes the authenticated user's account and all associated data. This action cannot be undone.\n\n**What gets deleted:**\n- User profile and account information\n- All bookmarks belonging to the user\n- All page visit history (activity tracking data)\n- All active sessions (user is logged out everywhere)\n- All OAuth account connections\n\n**What happens to linked devices:**\n- Anonymous devices previously linked to this account will have their user association removed\n- These devices can continue to work anonymously or be linked to a new account\n\n**Important:**\n- This endpoint requires the user to be authenticated via session cookie\n- There is no confirmation step at the API level - implement confirmation UI in your client\n- After successful deletion, the session cookie should be cleared client-side",
+        "operationId": "deleteUserAccount",
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Account deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["success", "message"],
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Indicates the deletion was successful",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Human-readable success message",
+                      "example": "Account deleted successfully"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - user is not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Unauthorized"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "User not found"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error during account deletion",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Failed to delete account"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/bookmarks": {
       "get": {
         "tags": ["Bookmarks"],

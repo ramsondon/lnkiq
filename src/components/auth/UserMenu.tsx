@@ -72,7 +72,7 @@ export function UserMenu({ user, locale, labels }: UserMenuProps) {
               {labels.dashboard}
             </Link>
             <Link
-              href={`/${locale}/dashboard/settings`}
+              href={`/${locale}/settings`}
               className="block px-4 py-2 text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
               onClick={() => setIsOpen(false)}
             >
